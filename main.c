@@ -7,6 +7,7 @@
 #include "display.h"
 #include "gameboy.h"
 #include "instructions/opcodes.h"
+#include "joystick.h"
 
 Gameboy gameboy = {.controls = 0xFF,
                    .cpu.SP = 0xFFFF,
@@ -48,6 +49,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    init_joystick();
     load_rom(argv[1]);
     glutInit(&argc, argv);
     display_loop();

@@ -3,6 +3,10 @@
 #ifndef CBOY_CONTROLS_H
 #define CBOY_CONTROLS_H
 
+void press(unsigned char i);
+
+void release(unsigned char i);
+
 void special_key_handler(int key, int x, int y);
 
 void special_key_up_handler(int key, int x, int y);
