@@ -39,13 +39,14 @@ void draw_color(unsigned char x, unsigned char y, unsigned char color) {
     }
 }
 
-void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset) {
+void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
     unsigned char palette = read_mmu(0xFF48);
 
     for (unsigned char y = 0; y < 8; y++) {
         for (unsigned char x = 0; x < 8; x++) {
-            unsigned char color = ((read_mmu(y * 2 + tile_offset) >> (7 - x)) & 1) << 1 |
-                                  ((read_mmu(y * 2 + 1 + tile_offset) >> (7 - x)) & 1);
+            unsigned char color =
+                ((read_mmu((y_flip ? 7 - y : y) * 2 + tile_offset) >> (x_flip ? x : (7 - x))) & 1) << 1 |
+                ((read_mmu((y_flip ? 7 - y : y) * 2 + 1 + tile_offset) >> (x_flip ? x : (7 - x))) & 1);
 
             if (color == 0) {
                 continue;
@@ -94,12 +95,16 @@ void render_sprites() {
         unsigned char y = read_mmu(0xFE00 + i) - 16;
         unsigned char x = read_mmu(0xFE00 + i + 1) - 8;
         unsigned char tile = read_mmu(0xFE00 + i + 2);
+        unsigned char attr = read_mmu(0xFE00 + i + 3);
+        bool x_flip = attr >> 5 & 1;
+        bool y_flip = attr >> 6 & 1;
 
         // hidden sprites
         if (y < 0 || y > 144 || x < 0 || x > 160) {
             continue;
         }
-        draw_tile(x, y, 0x8000 + tile * 16);
+
+        draw_tile(x, y, 0x8000 + tile * 16, x_flip, y_flip);
     }
 }
 
