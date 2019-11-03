@@ -52,6 +52,12 @@ void write_mmu(unsigned short addr, unsigned char value) {
     gameboy.mmu.ram[addr] = value;
 }
 
+void set_interrupt(unsigned char value) { write_mmu(0xFF0F, read_mmu(0xFF0F) | (1 << value)); }
+
+void set_vblank() { set_interrupt(0); }
+
+void set_lcd_stat() { set_interrupt(1); }
+
 /*
  * FF41 - STAT - LCDC Status (R/W)
  * Bit 6 - LYC=LY Coincidence Interrupt (1=Enable) (Read/Write)
@@ -71,12 +77,35 @@ void set_mode(unsigned char mode) {
     write_mmu(0xFF41, read_mmu(0xFF41) ^ mask);
 }
 
+unsigned char lyc() { return read_mmu(0xFF45); }
+
+void set_coincidence_flag(bool value) {
+    if (value) {
+        write_mmu(0xFF41, read_mmu(0xFF41) | (1 << 2));
+    } else {
+        write_mmu(0xFF41, read_mmu(0xFF41) & ~(1 << 2));
+    }
+}
+
+bool coincidence_interrupt() { return read_mmu(0xFF41) >> 6 & 1; }
+
 /*
  * FF44 - LY - LCDC Y-Coordinate (R) The LY indicates the vertical line to which the present data is transferred
  * to the LCD Driver. The LY can take on any value between 0 through 153. The values between 144 and 153
  * indicate the V-Blank period. Writing will reset the counter.
  */
-void set_ly(unsigned char y) { write_mmu(0xFF44, y); }
+void set_ly(unsigned char y) {
+    write_mmu(0xFF44, y);
+
+    if (lyc() == y) {
+        set_coincidence_flag(true);
+        if (coincidence_interrupt()) {
+            set_lcd_stat();
+        }
+    } else {
+        set_coincidence_flag(false);
+    }
+}
 
 unsigned char lcdc() { return read_mmu(0xFF40); }
 
@@ -92,7 +121,3 @@ unsigned short get_bg_tile(unsigned char x, unsigned char y) {
     return (bg_window_tile_data_select() ? 0x8000 : 0x9000) +
            (!bg_window_tile_data_select() || bg_tile_map_display_select() ? (char)tile : tile) * 16;
 }
-
-void set_interrupt(unsigned char value) { write_mmu(0xFF0F, read_mmu(0xFF0F) | (1 << value)); }
-
-void set_vblank() { set_interrupt(0); }

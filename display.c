@@ -15,6 +15,14 @@ int window_height = HEIGHT;
 
 unsigned char background[256][256];
 
+unsigned char scy[256] = {[0 ... 0xFF] = 0};
+unsigned char scx[256] = {[0 ... 0xFF] = 0};
+
+void set_params(unsigned char i) {
+    scy[i] = read_mmu(0xFF42);
+    scx[i] = read_mmu(0xFF43);
+}
+
 void draw_pixel(unsigned char x, unsigned char y, unsigned char r, unsigned char g, unsigned char b) {
     if (y > 160 || x > 144) {
         return;
@@ -75,7 +83,7 @@ void draw_bg_tile(unsigned char offset_x, unsigned char offset_y, unsigned short
 void draw_visible_bg_area() {
     for (unsigned char y = 0; y < HEIGHT; y++) {
         for (unsigned char x = 0; x < WIDTH; x++) {
-            draw_color(y, x, background[x][y]);
+            draw_color(y, x, background[(x + scx[y]) % 256][(y + scy[y]) % 256]);
         }
     }
 }

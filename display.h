@@ -7,4 +7,6 @@ void draw();
 
 void display_loop();
 
+void set_params(unsigned char i);
+
 #endif // CBOY_DISPLAY_H

@@ -116,6 +116,7 @@ void next_frame() {
         // 169-175 clks
         set_mode(3);
         next_instructions(172);
+        set_params(i);
 
         // MODE 0
         // 201-207 clks
