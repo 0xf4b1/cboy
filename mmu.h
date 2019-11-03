@@ -3,8 +3,11 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "mbc.h"
+
 typedef struct {
     unsigned char ram[0x10000];
+    Mbc mbc;
 } Mmu;
 
 unsigned char read_mmu(unsigned short addr);

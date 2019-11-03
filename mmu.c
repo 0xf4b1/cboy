@@ -11,10 +11,18 @@ unsigned char read_mmu(unsigned short addr) {
         return rand() % 0x100;
     }
 
+    if (addr < 0x8000) {
+        return read_mbc(addr);
+    }
+
     return gameboy.mmu.ram[addr];
 }
 
 void write_mmu(unsigned short addr, unsigned char value) {
+    if (addr >= 0x2000 && addr < 0x8000) {
+        write_mbc(addr, value);
+        return;
+    }
     if (addr <= 0x7FFF) {
         return;
     } else if (addr == 0xFF00) {
