@@ -13,6 +13,8 @@
 int window_width = WIDTH;
 int window_height = HEIGHT;
 
+bool fullscreen = false;
+
 unsigned char background[256][256];
 
 unsigned char scy[256] = {[0 ... 0xFF] = 0};
@@ -121,15 +123,20 @@ void draw() { glutPostRedisplay(); }
 void display() {
     window_width = glutGet(GLUT_WINDOW_WIDTH);
     window_height = glutGet(GLUT_WINDOW_HEIGHT);
+
     glLoadIdentity();
+    glViewport((window_width - (window_height / HEIGHT) * WIDTH) / 2, 0, ((float)window_height / HEIGHT) * WIDTH,
+               window_height);
     glOrtho(0.0f, WIDTH, HEIGHT, 0.0f, 0.0f, 1.0f);
+
     render_bg();
     render_sprites();
+
     glutSwapBuffers();
 }
 
 void display_loop() {
-    glutInitDisplayMode(GL_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GL_DOUBLE);
     glutInitWindowSize(WIDTH * 4, HEIGHT * 4);
     glutCreateWindow("cboy");
     glutDisplayFunc(display);
@@ -139,4 +146,14 @@ void display_loop() {
     glutKeyboardFunc(normal_key_handler);
     glutKeyboardUpFunc(normal_key_up_handler);
     glutMainLoop();
+}
+
+void toggle_fullscreen() {
+    if (!fullscreen) {
+        glutFullScreen();
+    } else {
+        glutPositionWindow(0, 0);
+        glutReshapeWindow(WIDTH * 4, HEIGHT * 4);
+    }
+    fullscreen = !fullscreen;
 }

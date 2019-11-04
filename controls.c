@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "gameboy.h"
 #include <GL/glut.h>
+
+#include "display.h"
+#include "gameboy.h"
 
 void press(unsigned char i) { gameboy.controls &= ~(1 << i); }
 
@@ -27,6 +29,9 @@ void special_key_up_handler(int key, int x, int y) {
         release(2);
     else if (key == GLUT_KEY_DOWN)
         release(3);
+    else if (key == GLUT_KEY_F11) {
+        toggle_fullscreen();
+    }
 }
 
 void normal_key_handler(unsigned char key, int x, int y) {
