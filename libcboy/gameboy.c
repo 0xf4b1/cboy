@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <GL/glut.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "cpu.h"
-#include "display.h"
 #include "gameboy.h"
 #include "instructions/opcodes.h"
-#include "joystick.h"
 
 Gameboy gameboy = {.controls = 0xFF,
                    .cpu.SP = 0xFFFF,
@@ -41,16 +38,4 @@ void load_rom(char *path) {
 
     fread(gameboy.mmu.mbc.rom, fileLen, 1, file);
     fclose(file);
-}
-
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        puts("No rom file specified");
-        exit(1);
-    }
-
-    init_joystick();
-    load_rom(argv[1]);
-    glutInit(&argc, argv);
-    display_loop();
 }

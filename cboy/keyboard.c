@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <GL/glut.h>
-
-#include "display.h"
-#include "gameboy.h"
-
-void press(unsigned char i) { gameboy.controls &= ~(1 << i); }
-
-void release(unsigned char i) { gameboy.controls |= (1 << i); }
+#include <controls.h>
+#include <display.h>
 
 void special_key_handler(int key, int x, int y) {
     if (key == GLUT_KEY_RIGHT)

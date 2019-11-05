@@ -1,0 +1,1 @@
+add_library(libcboy cpu.c mmu.c mbc.c display.c controls.c instructions/opcodes.c gameboy.c)

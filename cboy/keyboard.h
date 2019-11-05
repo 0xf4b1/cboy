@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef CBOY_CONTROLS_H
-#define CBOY_CONTROLS_H
-
-void press(unsigned char i);
-
-void release(unsigned char i);
+#ifndef CBOY_KEYBOARD_H
+#define CBOY_KEYBOARD_H
 
 void special_key_handler(int key, int x, int y);
 

@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef CPU_H
-#define CPU_H
+#ifndef LIBCBOY_CPU_H
+#define LIBCBOY_CPU_H
 
+#include "display.h"
 #include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
     // 8 bit registers
@@ -22,7 +27,7 @@ typedef struct {
     bool ime;
 } Cpu;
 
-void next_frame();
+Framebuffer next_frame();
 
 unsigned short AF();
 
@@ -60,4 +65,8 @@ void set_flag_H(bool set);
 
 void set_flag_C(bool set);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif // LIBCBOY_CPU_H

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef LIBCBOY_MMU_H
+#define LIBCBOY_MMU_H
 
 #include "mbc.h"
 
@@ -24,4 +24,4 @@ unsigned short get_bg_tile(unsigned char x, unsigned char y);
 
 void set_vblank();
 
-#endif
+#endif // LIBCBOY_MMU_H

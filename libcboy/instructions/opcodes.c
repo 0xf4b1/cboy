@@ -208,9 +208,11 @@ void init_ops() {
     opcodes[0xDC] = CALL_C_a16;
     opcodes[0xE0] = LDH_n_A;
     opcodes[0xE2] = LD_C_A;
+    opcodes[0xE3] = NOP;
     opcodes[0xE8] = ADD_SP_r8;
     opcodes[0xE9] = JP_HL;
     opcodes[0xEA] = LD_a16_A;
+    opcodes[0xEC] = NOP;
     opcodes[0xED] = NOP;
     opcodes[0xF0] = LDH_A_n;
     opcodes[0xF2] = LD_A_C;
@@ -296,6 +298,8 @@ void init_ops() {
     lenghts[0xDC] = 3;
     lenghts[0xE0] = 2;
     lenghts[0xE2] = 1;
+    lenghts[0xE3] = 1;
+    lenghts[0xEC] = 1;
     lenghts[0xE8] = 2;
     lenghts[0xE9] = 1;
     lenghts[0xEA] = 3;

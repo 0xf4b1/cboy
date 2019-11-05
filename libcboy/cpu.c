@@ -92,14 +92,13 @@ void next_instructions(int cycles) {
     }
 }
 
-void next_frame() {
-    if (lcd_display_enable() == false) {
+Framebuffer next_frame() {
+    while (lcd_display_enable() == false) {
         set_mode(0);
         write_mmu(0xFF44, 0);
         for (unsigned char i = 0; i < 154; i++) {
             next_instructions(456);
         }
-        return;
     }
 
     // Resolution - 160x144 (20x18 tiles)
@@ -134,6 +133,8 @@ void next_frame() {
         set_mode(1);
         next_instructions(456);
     }
+
+    return gameboy.framebuffer;
 }
 
 unsigned short AF() { return (gameboy.cpu.A << 8) + gameboy.cpu.F; }

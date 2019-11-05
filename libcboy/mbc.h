@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef CBOY_MBC_H
-#define CBOY_MBC_H
+#ifndef LIBCBOY_MBC_H
+#define LIBCBOY_MBC_H
 
 typedef struct {
     unsigned char *rom;
@@ -15,4 +15,4 @@ unsigned char read_mbc(unsigned short addr);
 
 void write_mbc(unsigned short addr, unsigned char value);
 
-#endif // CBOY_MBC_H
+#endif // LIBCBOY_MBC_H
