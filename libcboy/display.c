@@ -28,9 +28,9 @@ void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short ti
                 continue;
             }
 
-            unsigned char color =
-                ((read_mmu((y_flip ? 7 - y : y) * 2 + tile_offset) >> (x_flip ? x : (7 - x))) & 1) << 1 |
-                ((read_mmu((y_flip ? 7 - y : y) * 2 + 1 + tile_offset) >> (x_flip ? x : (7 - x))) & 1);
+            unsigned char color = read_mmu((y_flip ? 7 - y : y) * 2 + tile_offset) >> (x_flip ? x : (7 - x)) & 1 |
+                                  (read_mmu((y_flip ? 7 - y : y) * 2 + 1 + tile_offset) >> (x_flip ? x : (7 - x)) & 1)
+                                      << 1;
 
             if (color == 0) {
                 continue;
@@ -47,8 +47,8 @@ void draw_bg_tile(unsigned char offset_x, unsigned char offset_y, unsigned short
 
     for (unsigned char y = 0; y < 8; y++) {
         for (unsigned char x = 0; x < 8; x++) {
-            unsigned char color = ((read_mmu(y * 2 + tile_addr) >> (7 - x)) & 1) << 1 |
-                                  ((read_mmu(y * 2 + 1 + tile_addr) >> (7 - x)) & 1);
+            unsigned char color = ((read_mmu(y * 2 + tile_addr) >> (7 - x)) & 1) |
+                                  ((read_mmu(y * 2 + 1 + tile_addr) >> (7 - x)) & 1) << 1;
 
             color = (palette >> (color * 2)) & 3;
             background[offset_x + x][offset_y + y] = color;
