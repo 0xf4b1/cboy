@@ -83,7 +83,14 @@ void render_sprites() {
         bool x_flip = attr >> 5 & 1;
         bool y_flip = attr >> 6 & 1;
 
-        draw_tile(x, y, 0x8000 + tile * 16, x_flip, y_flip);
+        if (obj_sprite_size() == 0) {
+            // 8x8 sprite
+            draw_tile(x, y, 0x8000 + tile * 16, x_flip, y_flip);
+        } else {
+            // 8x16 sprite
+            draw_tile(x, y, 0x8000 + (tile & 0xFE) * 16, x_flip, y_flip);
+            draw_tile(x, y + 8, 0x8000 + (tile | 1) * 16, x_flip, y_flip);
+        }
     }
 }
 
