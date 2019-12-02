@@ -7,18 +7,23 @@
 #define HEIGHT 144
 
 unsigned char background[256][256];
+unsigned char window[256][256];
 
 unsigned char scy[256] = {[0 ... 0xFF] = 0};
 unsigned char scx[256] = {[0 ... 0xFF] = 0};
+unsigned char wy[256] = {[0 ... 0xFF] = 0};
+unsigned char wx[256] = {[0 ... 0xFF] = 0};
 
 void set_params(unsigned char i) {
     scy[i] = read_mmu(0xFF42);
     scx[i] = read_mmu(0xFF43);
+    wy[i] = read_mmu(0xFF4A);
+    wx[i] = read_mmu(0xFF4B);
 }
 
 void draw_color(unsigned char x, unsigned char y, unsigned char color) { gameboy.framebuffer.buffer[x][y] = color; }
 
-void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
+void draw_sprite(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
     unsigned char palette = read_mmu(0xFF48);
 
     for (unsigned char y = 0; y < 8; y++) {
@@ -42,8 +47,8 @@ void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short ti
     }
 }
 
-void draw_bg_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_addr) {
-    unsigned char palette = read_mmu(0xFF47);
+void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_addr, unsigned char palette,
+               unsigned char buffer[256][256]) {
 
     for (unsigned char y = 0; y < 8; y++) {
         for (unsigned char x = 0; x < 8; x++) {
@@ -51,15 +56,7 @@ void draw_bg_tile(unsigned char offset_x, unsigned char offset_y, unsigned short
                                   ((read_mmu(y * 2 + 1 + tile_addr) >> (7 - x)) & 1) << 1;
 
             color = (palette >> (color * 2)) & 3;
-            background[offset_x + x][offset_y + y] = color;
-        }
-    }
-}
-
-void draw_visible_bg_area() {
-    for (unsigned char y = 0; y < HEIGHT; y++) {
-        for (unsigned char x = 0; x < WIDTH; x++) {
-            draw_color(y, x, background[(x + scx[y]) % 256][(y + scy[y]) % 256]);
+            buffer[offset_x + x][offset_y + y] = color;
         }
     }
 }
@@ -67,11 +64,35 @@ void draw_visible_bg_area() {
 void render_bg() {
     for (unsigned char y = 0; y < 32; y++) {
         for (unsigned char x = 0; x < 32; x++) {
-            draw_bg_tile(x * 8, y * 8, get_bg_tile(x, y));
+            draw_tile(x * 8, y * 8, get_bg_tile(x, y), read_mmu(0xFF47), background);
         }
     }
 
-    draw_visible_bg_area();
+    for (unsigned char y = 0; y < HEIGHT; y++) {
+        for (unsigned char x = 0; x < WIDTH; x++) {
+            draw_color(y, x, background[(x + scx[y]) % 256][(y + scy[y]) % 256]);
+        }
+    }
+}
+
+void render_window() {
+    if (!window_display_enable()) {
+        return;
+    }
+
+    for (unsigned char y = 0; y < 32; y++) {
+        for (unsigned char x = 0; x < 32; x++) {
+            draw_tile(x * 8, y * 8, get_window_tile(x, y), read_mmu(0xFF47), window);
+        }
+    }
+
+    for (unsigned char y = 0; y < HEIGHT; y++) {
+        for (unsigned char x = 0; x < WIDTH; x++) {
+            if (x + wx[y] >= 7 && x + wx[y] <= WIDTH + 7 && y + wy[y] >= 0 && y + wy[y] <= HEIGHT) {
+                draw_color(y + wy[y], x + wx[x] - 7, window[x][y]);
+            }
+        }
+    }
 }
 
 void render_sprites() {
@@ -85,16 +106,17 @@ void render_sprites() {
 
         if (obj_sprite_size() == 0) {
             // 8x8 sprite
-            draw_tile(x, y, 0x8000 + tile * 16, x_flip, y_flip);
+            draw_sprite(x, y, 0x8000 + tile * 16, x_flip, y_flip);
         } else {
             // 8x16 sprite
-            draw_tile(x, y, 0x8000 + (tile & 0xFE) * 16, x_flip, y_flip);
-            draw_tile(x, y + 8, 0x8000 + (tile | 1) * 16, x_flip, y_flip);
+            draw_sprite(x, y, 0x8000 + (tile & 0xFE) * 16, x_flip, y_flip);
+            draw_sprite(x, y + 8, 0x8000 + (tile | 1) * 16, x_flip, y_flip);
         }
     }
 }
 
 void draw() {
     render_bg();
+    render_window();
     render_sprites();
 }

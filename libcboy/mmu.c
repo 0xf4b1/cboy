@@ -109,15 +109,28 @@ void set_ly(unsigned char y) {
 
 unsigned char lcdc() { return read_mmu(0xFF40); }
 
-bool lcd_display_enable() { return lcdc() >> 7 & 1; }
+bool obj_sprite_size() { return lcdc() >> 2 & 1; }
 
 bool bg_tile_map_display_select() { return lcdc() >> 3 & 1; }
 
 bool bg_window_tile_data_select() { return lcdc() >> 4 & 1; }
+
+bool window_display_enable() { return lcdc() >> 5 & 1; }
+
+bool window_tile_map_display_select() { return lcdc() >> 6 & 1; }
+
+bool lcd_display_enable() { return lcdc() >> 7 & 1; }
 
 unsigned short get_bg_tile(unsigned char x, unsigned char y) {
     unsigned char tile = read_mmu((bg_tile_map_display_select() ? 0x9C00 : 0x9800) + y * 32 + x);
 
     return (bg_window_tile_data_select() ? 0x8000 : 0x9000) +
            (!bg_window_tile_data_select() || bg_tile_map_display_select() ? (char)tile : tile) * 16;
+}
+
+unsigned short get_window_tile(unsigned char x, unsigned char y) {
+    unsigned char tile = read_mmu((window_tile_map_display_select() ? 0x9C00 : 0x9800) + y * 32 + x);
+
+    return (bg_window_tile_data_select() ? 0x8000 : 0x9000) +
+           (!bg_window_tile_data_select() || window_tile_map_display_select() ? (char)tile : tile) * 16;
 }

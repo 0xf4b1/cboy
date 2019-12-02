@@ -20,7 +20,13 @@ void set_ly(unsigned char y);
 
 bool lcd_display_enable();
 
+bool obj_sprite_size();
+
+bool window_display_enable();
+
 unsigned short get_bg_tile(unsigned char x, unsigned char y);
+
+unsigned short get_window_tile(unsigned char x, unsigned char y);
 
 void set_vblank();
 
