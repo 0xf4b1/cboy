@@ -2,7 +2,10 @@
 
 An experimental GameBoy emulator written in C for educational purposes. It emulates the hardware, like the LR35902 CPU with its instruction set, MMU, and Display where the rendering is done with OpenGL, and you can play with your keyboard or joystick.
 
-Some ROMs like _Tetris_ or _Super Mario Land_ are playable, but many others are not yet working.
+## Screenshots
+
+![](images/screenshot1.png)
+![](images/screenshot2.png)
 
 ## Building
 
@@ -39,7 +42,6 @@ It should use joystick from `/dev/input/js0` if available. Only tested with XBOX
 
 ### Unimplemented
 
-- Display windows
 - Saving
 - Timers
 - Sound
