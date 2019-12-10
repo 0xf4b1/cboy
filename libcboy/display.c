@@ -9,10 +9,10 @@
 unsigned char background[256][256];
 unsigned char window[256][256];
 
-unsigned char scy[256] = {[0 ... 0xFF] = 0};
-unsigned char scx[256] = {[0 ... 0xFF] = 0};
-unsigned char wy[256] = {[0 ... 0xFF] = 0};
-unsigned char wx[256] = {[0 ... 0xFF] = 0};
+unsigned char scy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+unsigned char scx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+unsigned char wy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+unsigned char wx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
 
 void set_params(unsigned char i) {
     scy[i] = read_mmu(0xFF42);
@@ -64,7 +64,7 @@ void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short ti
 void render_bg() {
     for (unsigned char y = 0; y < 32; y++) {
         for (unsigned char x = 0; x < 32; x++) {
-            draw_tile(x * 8, y * 8, get_bg_tile(x, y), read_mmu(0xFF47), background);
+            draw_tile(x * 8, y * 8, get_tile(x, y, false), read_mmu(0xFF47), background);
         }
     }
 
@@ -82,14 +82,14 @@ void render_window() {
 
     for (unsigned char y = 0; y < 32; y++) {
         for (unsigned char x = 0; x < 32; x++) {
-            draw_tile(x * 8, y * 8, get_window_tile(x, y), read_mmu(0xFF47), window);
+            draw_tile(x * 8, y * 8, get_tile(x, y, true), read_mmu(0xFF47), window);
         }
     }
 
     for (unsigned char y = 0; y < HEIGHT; y++) {
         for (unsigned char x = 0; x < WIDTH; x++) {
             if (x + wx[y] >= 7 && x + wx[y] <= WIDTH + 7 && y + wy[y] >= 0 && y + wy[y] <= HEIGHT) {
-                draw_color(y + wy[y], x + wx[x] - 7, window[x][y]);
+                draw_color(y + wy[y], x + wx[y] - 7, window[x][y]);
             }
         }
     }

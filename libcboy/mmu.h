@@ -24,9 +24,7 @@ bool obj_sprite_size();
 
 bool window_display_enable();
 
-unsigned short get_bg_tile(unsigned char x, unsigned char y);
-
-unsigned short get_window_tile(unsigned char x, unsigned char y);
+unsigned short get_tile(unsigned char x, unsigned char y, bool window);
 
 void set_vblank();
 
