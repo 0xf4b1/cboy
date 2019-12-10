@@ -38,7 +38,7 @@ void check_interrupt() {
         // check for interrupt enable and interrupt request being set
         if (interrupt_enable >> i & 1 && interrupt_flag >> i & 1) {
             // reset corresponding bit
-            gameboy.mmu.ram[0xFF0F] &= ~(1 << i);
+            write_mmu(0xFF0F, read_mmu(0xFF0F) & ~(1 << i));
 
             // disable IME
             gameboy.cpu.ime = false;

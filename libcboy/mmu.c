@@ -7,49 +7,41 @@
 #include "gameboy.h"
 
 unsigned char read_mmu(unsigned short addr) {
-    if (addr == 0xFF04) {
+    if (addr < 0x8000) {
+        return read_mbc(addr);
+    } else if (addr == 0xFF04) {
         return rand() % 0x100;
     }
 
-    if (addr < 0x8000) {
-        return read_mbc(addr);
-    }
-
-    return gameboy.mmu.ram[addr];
+    return gameboy.mmu.ram[addr - 0x8000];
 }
 
 void write_mmu(unsigned short addr, unsigned char value) {
-    if (addr >= 0x2000 && addr < 0x8000) {
+    if (addr < 0x8000) {
         write_mbc(addr, value);
-        return;
-    }
-    if (addr <= 0x7FFF) {
-        return;
     } else if (addr == 0xFF00) {
+
         bool buttons_selected = ((value >> 5) & 1) == 0;
         bool directions_selected = ((value >> 4) & 1) == 0;
-        unsigned char res = value;
 
         if (buttons_selected && !directions_selected) {
-            res |= gameboy.controls >> 4;
+            value |= gameboy.controls >> 4;
         } else if (directions_selected && !buttons_selected) {
-            res |= gameboy.controls & 0xF;
+            value |= gameboy.controls & 0xF;
         } else {
-            res |= 0xF;
+            value |= 0xF;
         }
-        gameboy.mmu.ram[addr] = res;
-        return;
-    } else if (addr == 0xFF02) {
-        printf("%c", gameboy.mmu.ram[0xFF01]);
-    } else if (addr == 0xFF04) {
-        gameboy.mmu.ram[0xFF04] = 0;
-        return;
-    } else if (addr == 0xFF46) {
-        memcpy(gameboy.mmu.ram + 0xFE00, gameboy.mmu.ram + (value << 8), 0x9F);
-        return;
-    }
+        gameboy.mmu.ram[addr - 0x8000] = value;
 
-    gameboy.mmu.ram[addr] = value;
+    } else if (addr == 0xFF02) {
+        printf("%c", gameboy.mmu.ram[0xFF01 - 0x8000]);
+    } else if (addr == 0xFF04) {
+        gameboy.mmu.ram[0xFF04 - 0x8000] = 0;
+    } else if (addr == 0xFF46) {
+        memcpy(gameboy.mmu.ram + 0xFE00 - 0x8000, gameboy.mmu.ram + (value << 8) - 0x8000, 0x9F);
+    } else {
+        gameboy.mmu.ram[addr - 0x8000] = value;
+    }
 }
 
 void set_interrupt(unsigned char value) { write_mmu(0xFF0F, read_mmu(0xFF0F) | (1 << value)); }

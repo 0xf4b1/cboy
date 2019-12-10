@@ -6,7 +6,7 @@
 #include "mbc.h"
 
 typedef struct {
-    unsigned char ram[0x10000];
+    unsigned char ram[0x8000];
     Mbc mbc;
 } Mmu;
 
