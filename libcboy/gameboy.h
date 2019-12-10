@@ -22,6 +22,10 @@ Gameboy gameboy;
 
 void load_rom(char *path);
 
+void load_state();
+
+void save_state();
+
 #ifdef __cplusplus
 }
 #endif

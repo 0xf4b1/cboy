@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include <controls.h>
 #include <display.h>
+#include <gameboy.h>
 
 void special_key_handler(int key, int x, int y) {
     if (key == GLUT_KEY_RIGHT)
@@ -24,9 +25,12 @@ void special_key_up_handler(int key, int x, int y) {
         release(2);
     else if (key == GLUT_KEY_DOWN)
         release(3);
-    else if (key == GLUT_KEY_F11) {
+    else if (key == GLUT_KEY_F11)
         toggle_fullscreen();
-    }
+    else if (key == GLUT_KEY_F5)
+        load_state();
+    else if (key == GLUT_KEY_F6)
+        save_state();
 }
 
 void normal_key_handler(unsigned char key, int x, int y) {

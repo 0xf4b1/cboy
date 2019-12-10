@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <fcntl.h>
+#include <gameboy.h>
 #include <linux/joystick.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -43,6 +44,10 @@ void *joystick_thread() {
                 fun(6);
             } else if (event.number == 7) {
                 fun(7);
+            } else if (event.number == 4) {
+                load_state();
+            } else if (event.number == 5) {
+                save_state();
             }
         }
     }

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "gameboy.h"
 #include "instructions/opcodes.h"
@@ -31,6 +32,10 @@ void load_rom(char *path) {
 
     printf("ROM path: %s\n", path);
 
+    char *filename = malloc(strlen(path));
+    strcpy(filename, path);
+    gameboy.mmu.mbc.filename = filename;
+
     FILE *file = fopen(path, "rb");
     if (!file) {
         printf("Error reading rom file!");
@@ -53,4 +58,41 @@ void load_rom(char *path) {
     fclose(file);
 
     inject_bootrom();
+}
+
+void load_state() {
+    char filename[strlen(gameboy.mmu.mbc.filename) + 4];
+    stpcpy(filename, gameboy.mmu.mbc.filename);
+    strcat(filename, ".sav");
+
+    FILE *file = fopen(filename, "rb");
+
+    if (!file) {
+        printf("No state for current rom exists!\n");
+        return;
+    }
+
+    // read ram state
+    fread(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
+
+    // read cpu state
+    fread(&gameboy.cpu, sizeof(Cpu), 1, file);
+
+    fclose(file);
+}
+
+void save_state() {
+    char filename[strlen(gameboy.mmu.mbc.filename) + 4];
+    stpcpy(filename, gameboy.mmu.mbc.filename);
+    strcat(filename, ".sav");
+
+    FILE *file = fopen(filename, "wb");
+
+    // save ram state
+    fwrite(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
+
+    // save cpu state
+    fwrite(&gameboy.cpu, sizeof(Cpu), 1, file);
+
+    fclose(file);
 }

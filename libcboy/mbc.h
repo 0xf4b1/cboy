@@ -4,6 +4,7 @@
 #define LIBCBOY_MBC_H
 
 typedef struct {
+    char *filename;
     unsigned char *rom;
 
     unsigned char rom_bank_number;
