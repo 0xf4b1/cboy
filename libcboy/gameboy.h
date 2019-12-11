@@ -18,7 +18,7 @@ typedef struct {
     Framebuffer framebuffer;
 } Gameboy;
 
-Gameboy gameboy;
+extern Gameboy gameboy;
 
 void load_rom(char *path);
 

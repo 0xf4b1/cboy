@@ -98,7 +98,7 @@ unsigned char JP_HL() {
  * Use with:
  * n = one byte signed immediate value
  */
-void JR(char value) { gameboy.cpu.PC += value; }
+void JR(unsigned char value) { gameboy.cpu.PC += (value ^ 0x80) - 0x80; }
 
 unsigned char JR_C_r8(unsigned char value) {
     if (flag_C()) {
