@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "cb.c"
-#include "instructions.c"
+#include "../gameboy.h"
+#include "cb.h"
+#include "instructions.h"
 
 unsigned char (*opcodes[0x100])() = {[0 ... 0xFF] = NOP};
 
