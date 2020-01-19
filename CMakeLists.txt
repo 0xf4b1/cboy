@@ -11,5 +11,14 @@ set(CMAKE_C_FLAGS_RELEASE "-Ofast -DNDEBUG")
 
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
+if(SWITCH)
+
+  add_subdirectory(nxboy)
+
+else()
+
+  add_subdirectory(cboy)
+
+endif()
+
 add_subdirectory(libcboy)
-add_subdirectory(cboy)
