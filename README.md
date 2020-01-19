@@ -29,13 +29,13 @@ Instead of using OpenGL as renderer, there is another display output method that
 
 To enable display output to framebuffer, use cmake with the following option enabled:
 
-	$ cmake .. -DRENDERER=FRAMEBUFFER
+	$ cmake -DRENDERER=FRAMEBUFFER ..
 
 Disable cursor blinking:
 
 	# echo 0 > /sys/class/graphics/fbcon/cursor_blink
 
-## AnBoy
+# AnBoy
 
 AnBoy is cboy on Android! It uses libcboy based on [NativeActivity](https://github.com/android/ndk-samples/tree/master/native-activity), the rendering is done via OpenGL ES, and the controls are currently very basic, e.g. direction keys via swipe gestures and buttons via tapping on specific display regions. This works quite well for ROMs like `Tetris` or `Pokemon Red/Blue`! :) It comes with a small Activity that allows you to browse your `/sdcard` to select a ROM.
 
@@ -45,20 +45,37 @@ AnBoy is cboy on Android! It uses libcboy based on [NativeActivity](https://gith
 	$ ./gradlew assembleDebug
 	$ adb install anboy/build/outputs/apk/debug/anboy-debug.apk
 
-## Controls
+# nxboy
 
-| Key   | Keyboard    | XBOX controller | AnBoy            |
-|-------|:-----------:|:---------------:|:----------------:|
-|Up     | Up          | Up              | Swipe up         |
-|Down   | Down        | Down            | Swipe down       |
-|Left   | Left        | Left            | Swipe left       |
-|Right  | Right       | Right           | Swipe right      |
-|A      | A           | A               | Tap lower screen |
-|B      | S           | B               | unassigned       |
-|Start  | Q           | Start           | Tap middle right |
-|Select | W           | Back            | Tap middle left  |
-|Load   | F5          | LB              | Tap upper left   |
-|Save   | F6          | RB              | Tap upper right  |
+nxboy is cboy on Nintendo Switch! It uses libcboy for emulation and libnx to directly draw to the framebuffer and for handling the input. Your Switch needs to be able to run homebrew.
+
+## Building
+
+First you need to setup [devkitpro](https://switchbrew.org/wiki/Setting_up_Development_Environment) and have `$DEVKITPRO` set to the installed path.
+
+	$ git clone https://github.com/0xf4b1/cboy && cd cboy
+	$ mkdir build && cd build
+	$ cmake -DCMAKE_TOOLCHAIN_FILE=../nxboy/cmake/devkita64-libnx.cmake ..
+	$ make
+
+## Usage
+
+Copy the `nxboy.nro` on your sd-card into `/switch` and the ROM you want to play to `/switch/rom.gb` and start nxboy via homebrew menu. There is no ROM selection / browser available yet.
+
+# Controls
+
+| Key   | Keyboard    | XBOX controller | AnBoy            | nxboy |
+|-------|:-----------:|:---------------:|:----------------:|:-----:|
+|Up     | Up          | Up              | Swipe up         | Up    |
+|Down   | Down        | Down            | Swipe down       | Down  |
+|Left   | Left        | Left            | Swipe left       | Left  |
+|Right  | Right       | Right           | Swipe right      | Right |
+|A      | A           | A               | Tap lower screen | B     |
+|B      | S           | B               | unassigned       | A     |
+|Start  | Q           | Start           | Tap middle right | X     |
+|Select | W           | Back            | Tap middle left  | Y     |
+|Load   | F5          | LB              | Tap upper left   | L     |
+|Save   | F6          | RB              | Tap upper right  | R     |
 
 ## Implemented
 
