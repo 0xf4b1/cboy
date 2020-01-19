@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <GL/glut.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "gameboy.h"
 #include "joystick.h"
@@ -14,6 +14,5 @@ int main(int argc, char *argv[]) {
 
     init_joystick();
     load_rom(argv[1]);
-    glutInit(&argc, argv);
     display_loop();
 }

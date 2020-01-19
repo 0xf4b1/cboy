@@ -50,6 +50,8 @@ void idle_func() {
 }
 
 void display_loop() {
+    int argc = 0;
+    glutInit(&argc, NULL);
     glutInitDisplayMode(GL_DOUBLE);
     glutInitWindowSize(WIDTH * 4, HEIGHT * 4);
     glutCreateWindow("cboy");

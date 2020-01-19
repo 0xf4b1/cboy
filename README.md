@@ -23,6 +23,18 @@ An experimental GameBoy emulator written in C for educational purposes. It emula
 
 It should use joystick from `/dev/input/js0` if available. Only tested with XBOX 360 controller.
 
+## Framebuffer output instead OpenGL
+
+Instead of using OpenGL as renderer, there is another display output method that directly writes to the framebuffer `/dev/fb0`. It only works outside X11 and only takes input from joystick. This method was intended to run the emulator on a Raspberry Pi 2, where the OpenGL performance with GLUT is very poor (would need OpenGL ES 2.0).
+
+To enable display output to framebuffer, use cmake with the following option enabled:
+
+	$ cmake .. -DRENDERER=FRAMEBUFFER
+
+Disable cursor blinking:
+
+	# echo 0 > /sys/class/graphics/fbcon/cursor_blink
+
 ## AnBoy
 
 AnBoy is cboy on Android! It uses libcboy based on [NativeActivity](https://github.com/android/ndk-samples/tree/master/native-activity), the rendering is done via OpenGL ES, and the controls are currently very basic, e.g. direction keys via swipe gestures and buttons via tapping on specific display regions. This works quite well for ROMs like `Tetris` or `Pokemon Red/Blue`! :) It comes with a small Activity that allows you to browse your `/sdcard` to select a ROM.
