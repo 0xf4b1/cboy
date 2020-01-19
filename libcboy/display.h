@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct {
     unsigned char buffer[144][160];
-} Framebuffer;
+} Frame;
 
 void draw();
 

@@ -15,7 +15,7 @@ int window_height = HEIGHT;
 
 bool fullscreen = false;
 
-Framebuffer buffer;
+Frame buffer;
 
 void draw_pixel_rgb(unsigned char x, unsigned char y, unsigned char r, unsigned char g, unsigned char b) {
     if (x > 160 || y > 144) {

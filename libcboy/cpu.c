@@ -92,7 +92,7 @@ void next_instructions(int cycles) {
     }
 }
 
-Framebuffer next_frame() {
+Frame next_frame() {
     while (lcd_display_enable() == false) {
         set_mode(0);
         write_mmu(0xFF44, 0);

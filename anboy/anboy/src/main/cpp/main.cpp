@@ -82,7 +82,7 @@ void android_main(struct android_app *state) {
             }
         }
 
-        Framebuffer buffer = next_frame();
+        Frame buffer = next_frame();
         engine_draw_frame(&engine, buffer.buffer);
 
         release_button();

@@ -27,7 +27,7 @@ typedef struct {
     bool ime;
 } Cpu;
 
-Framebuffer next_frame();
+Frame next_frame();
 
 unsigned short AF();
 

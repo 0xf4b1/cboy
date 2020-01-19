@@ -15,7 +15,7 @@ typedef struct {
     Cpu cpu;
     Mmu mmu;
     unsigned char controls;
-    Framebuffer framebuffer;
+    Frame framebuffer;
 } Gameboy;
 
 extern Gameboy gameboy;
