@@ -128,17 +128,9 @@ void engine_draw_frame(struct engine *engine, unsigned char buffer[HEIGHT][WIDTH
 
     for (unsigned char y = 0; y < HEIGHT; y++) {
         for (unsigned char x = 0; x < WIDTH; x++) {
-            unsigned char color = buffer[y][x];
 
-            if (color == 0) {
-                draw_color(x, y, 1);
-            } else if (color == 1) {
-                draw_color(x, y, 0.5);
-            } else if (color == 2) {
-                draw_color(x, y, 0.25);
-            } else if (color == 3) {
-                draw_color(x, y, 0);
-            }
+            unsigned char color = buffer[y][x];
+            draw_color(x, y, (float)color / 255);
         }
     }
 

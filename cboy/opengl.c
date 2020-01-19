@@ -17,28 +17,13 @@ bool fullscreen = false;
 
 Frame buffer;
 
-void draw_pixel_rgb(unsigned char x, unsigned char y, unsigned char r, unsigned char g, unsigned char b) {
-    if (x > 160 || y > 144) {
-        return;
-    }
-
-    glPointSize(window_width / (float)WIDTH);
-    glBegin(GL_POINTS);
-    glColor3f((float)r / 255, (float)g / 255, (float)b / 255);
-    glVertex2i(x, y);
-    glEnd();
-}
 
 void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
-    if (color == 0) {
-        draw_pixel_rgb(x, y, 255, 255, 255);
-    } else if (color == 1) {
-        draw_pixel_rgb(x, y, 128, 128, 128);
-    } else if (color == 2) {
-        draw_pixel_rgb(x, y, 64, 64, 64);
-    } else if (color == 3) {
-        draw_pixel_rgb(x, y, 0, 0, 0);
-    }
+    glPointSize(window_width / (float)WIDTH);
+    glBegin(GL_POINTS);
+    glColor3f((float)color / 255, (float)color / 255, (float)color / 255);
+    glVertex2i(x, y);
+    glEnd();
 }
 
 void display() {

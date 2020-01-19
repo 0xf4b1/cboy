@@ -21,7 +21,23 @@ void set_params(unsigned char i) {
     wx[i] = read_mmu(0xFF4B);
 }
 
-void draw_color(unsigned char x, unsigned char y, unsigned char color) { gameboy.framebuffer.buffer[x][y] = color; }
+void draw_color(unsigned char x, unsigned char y, unsigned char color) {
+    switch (color) {
+        case 0:
+            color = 255;
+            break;
+        case 1:
+            color = 128;
+            break;
+        case 2:
+            color = 64;
+            break;
+        case 3:
+            color = 0;
+            break;
+    }
+    gameboy.framebuffer.buffer[x][y] = color;
+}
 
 void draw_sprite(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
     unsigned char palette = read_mmu(0xFF48);
