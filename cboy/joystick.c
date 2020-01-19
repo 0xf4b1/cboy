@@ -28,26 +28,37 @@ void *joystick_thread() {
     while (read_event(js_dev, &event) == 0) {
         if (event.type == JS_EVENT_BUTTON) {
             void (*fun)(unsigned char) = event.value ? press : release;
-            if (event.number == 12) {
-                fun(0);
-            } else if (event.number == 11) {
-                fun(1);
-            } else if (event.number == 13) {
-                fun(2);
-            } else if (event.number == 14) {
-                fun(3);
-            } else if (event.number == 0) {
-                fun(4);
-            } else if (event.number == 1) {
-                fun(5);
-            } else if (event.number == 6) {
-                fun(6);
-            } else if (event.number == 7) {
-                fun(7);
-            } else if (event.number == 4) {
-                load_state();
-            } else if (event.number == 5) {
-                save_state();
+            switch (event.number) {
+                case 12:
+                    fun(RIGHT);
+                    break;
+                case 11:
+                    fun(LEFT);
+                    break;
+                case 13:
+                    fun(UP);
+                    break;
+                case 14:
+                    fun(DOWN);
+                    break;
+                case 0:
+                    fun(CBOY_KEY_A);
+                    break;
+                case 1:
+                    fun(CBOY_KEY_B);
+                    break;
+                case 6:
+                    fun(SELECT);
+                    break;
+                case 7:
+                    fun(START);
+                    break;
+                case 4:
+                    load_state();
+                    break;
+                case 5:
+                    save_state();
+                    break;
             }
         }
     }

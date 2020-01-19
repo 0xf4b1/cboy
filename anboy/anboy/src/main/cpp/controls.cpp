@@ -27,14 +27,14 @@ int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
             if (!pressed_direction) {
                 if (down_y > (float)get_display_height() / 2) {
                     // A button
-                    press(4);
+                    press(CBOY_KEY_A);
                 } else if (down_y > (float)get_display_height() / 4) {
                     if (down_x < (float)get_display_width() / 2) {
                         // select
-                        press(6);
+                        press(SELECT);
                     } else {
                         // start
-                        press(7);
+                        press(START);
                     }
                 } else {
                     if (down_x < (float)get_display_width() / 2) {
@@ -63,18 +63,18 @@ int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
                 break;
             } else if (abs(delta_x) > abs(delta_y)) {
                 if (delta_x > 0) {
-                    press(0);
+                    press(RIGHT);
                 } else {
                     // left
-                    press(1);
+                    press(LEFT);
                 }
             } else {
                 if (delta_y > 0) {
                     // down
-                    press(3);
+                    press(DOWN);
                 } else {
                     // up
-                    press(2);
+                    press(UP);
                 }
             }
             pressed_direction = true;
@@ -87,8 +87,8 @@ int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
 void release_button() {
     if (pressed_button) {
         pressed_button = false;
-        release(4);
-        release(6);
-        release(7);
+        release(CBOY_KEY_A);
+        release(SELECT);
+        release(START);
     }
 }

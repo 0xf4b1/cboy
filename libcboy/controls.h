@@ -7,6 +7,16 @@
 extern "C" {
 #endif
 
+#define RIGHT 0
+#define LEFT 1
+#define UP 2
+#define DOWN 3
+
+#define CBOY_KEY_A 4
+#define CBOY_KEY_B 5
+#define SELECT 6
+#define START 7
+
 void press(unsigned char i);
 
 void release(unsigned char i);
