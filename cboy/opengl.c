@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <GL/gl.h>
-#include <GL/glut.h>
-#include <cpu.h>
 #include <stdbool.h>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include <cpu.h>
 
 #include "keyboard.h"
 
@@ -51,7 +56,7 @@ void idle_func() {
 
 void display_loop() {
     int argc = 0;
-    glutInit(&argc, NULL);
+    glutInit(&argc, 0);
     glutInitDisplayMode(GL_DOUBLE);
     glutInitWindowSize(WIDTH * 4, HEIGHT * 4);
     glutCreateWindow("cboy");
