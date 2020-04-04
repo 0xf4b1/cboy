@@ -15,5 +15,5 @@ jobs:
     - name: build
       run: |
         mkdir build && cd build
-        cmake -G "MinGW Makefiles" -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
+        cmake -G "MSYS Makefiles" -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
         make
