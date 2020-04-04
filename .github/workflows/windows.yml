@@ -10,7 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install dependencies
-      run: vcpkg install freeglut:x64-windows
+      run: |
+        vcpkg install freeglut
+        choco install ninja
     - name: build
       run: |
         mkdir build && cd build
