@@ -16,3 +16,7 @@ int main(int argc, char *argv[]) {
     load_rom(argv[1]);
     display_loop();
 }
+
+void serial_print(char c) {
+    printf("%c", c);
+}

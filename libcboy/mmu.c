@@ -34,7 +34,7 @@ void write_mmu(unsigned short addr, unsigned char value) {
         gameboy.mmu.ram[addr - 0x8000] = value;
 
     } else if (addr == 0xFF02) {
-        printf("%c", gameboy.mmu.ram[0xFF01 - 0x8000]);
+        serial_print(gameboy.mmu.ram[0xFF01 - 0x8000]);
     } else if (addr == 0xFF04) {
         gameboy.mmu.ram[0xFF04 - 0x8000] = 0;
     } else if (addr == 0xFF46) {
