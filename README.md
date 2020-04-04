@@ -1,6 +1,7 @@
 # cboy
 
 ![](https://github.com/0xf4b1/cboy/workflows/linux/badge.svg)
+![](https://github.com/0xf4b1/cboy/workflows/macos/badge.svg)
 ![](https://github.com/0xf4b1/cboy/workflows/android/badge.svg)
 
 An experimental GameBoy emulator written in C for educational purposes. It emulates the hardware, like the LR35902 CPU with its instruction set, MMU, and Display where the rendering is done with OpenGL, and you can play with your keyboard or joystick. Saving is now possible by storing the whole emulation state (CPU registers and memory), so you can immediately continue where you left off.

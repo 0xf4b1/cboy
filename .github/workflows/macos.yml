@@ -1,0 +1,20 @@
+name: macos
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: build
+      run: |
+        mkdir build && cd build
+        cmake -DTEST=1 ..
+        make
+    - name: test
+      run: |
+        cd build
+        make test
