@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <GL/gl.h>
-#include <GL/glut.h>
-#include <cpu.h>
 #include <stdbool.h>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include <cpu.h>
 
 #include "keyboard.h"
 

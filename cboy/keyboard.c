@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
+
 #include <controls.h>
 #include <display.h>
 #include <gameboy.h>
