@@ -14,5 +14,5 @@ jobs:
     - name: build
       run: |
         mkdir build && cd build
-        cmake -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
+        cmake -T "LLVM" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
         make
