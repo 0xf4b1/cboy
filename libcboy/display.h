@@ -13,8 +13,6 @@ typedef struct {
 
 void draw();
 
-void display_loop();
-
 void set_params(unsigned char i);
 
 void toggle_fullscreen();

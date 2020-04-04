@@ -32,7 +32,7 @@ void load_rom(char *path) {
 
     printf("ROM path: %s\n", path);
 
-    char *filename = malloc(strlen(path));
+    char *filename = malloc(strlen(path) + 1);
     strcpy(filename, path);
     gameboy.mmu.mbc.filename = filename;
 

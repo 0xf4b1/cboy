@@ -104,7 +104,7 @@ void render_window() {
 
     for (unsigned char y = 0; y < HEIGHT; y++) {
         for (unsigned char x = 0; x < WIDTH; x++) {
-            if (x + wx[y] >= 7 && x + wx[y] <= WIDTH + 7 && y + wy[y] >= 0 && y + wy[y] <= HEIGHT) {
+            if (x + wx[y] >= 7 && x + wx[y] < WIDTH + 7 && y + wy[y] >= 0 && y + wy[y] < HEIGHT) {
                 draw_color(y + wy[y], x + wx[y] - 7, window[x][y]);
             }
         }
