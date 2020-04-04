@@ -10,9 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install dependencies
-      run: vcpkg install freeglut
+      run: vcpkg install freeglut:x64-windows
     - name: build
       run: |
         mkdir build && cd build
-        cmake -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
+        cmake -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
         make
