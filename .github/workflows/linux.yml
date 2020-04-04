@@ -14,5 +14,9 @@ jobs:
     - name: build
       run: |
         mkdir build && cd build
-        cmake ..
+        cmake -DTEST=1 ..
         make
+    - name: test
+      run: |
+        cd build
+        make test
