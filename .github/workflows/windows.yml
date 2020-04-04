@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: install dependencies
+      run: vcpkg install freeglut
     - name: build
       run: |
         mkdir build && cd build
