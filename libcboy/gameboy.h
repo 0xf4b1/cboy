@@ -20,6 +20,8 @@ typedef struct {
 
 extern Gameboy gameboy;
 
+void serial_print(char c);
+
 void load_rom(char *path);
 
 void load_state();

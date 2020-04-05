@@ -88,3 +88,7 @@ void android_main(struct android_app *state) {
         release_button();
     }
 }
+
+void serial_print(char c) {
+    // no output
+}
