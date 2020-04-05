@@ -92,6 +92,25 @@ Copy the `nxboy.nro` on your sd-card into `/switch` and the ROM you want to play
 - Sound
 - more ...
 
+
+## Blargg test roms
+
+### cpu_instrs
+
+| ROM                      | Status |
+| ------------------------ |:------:|
+| 01-special.gb            | ✓      |
+| 02-interrupts.gb         | ✗ (not implemented)     |
+| 03-op sp,hl.gb           | ✓      |
+| 04-op r,imm.gb           | ✓      |
+| 05-op rp.gb              | ✓      |
+| 06-ld r,r.gb             | ✓      |
+| 07-jr,jp,call,ret,rst.gb | ✗ (since 8c0cf79)     |
+| 08-misc instrs.gb        | ✓      |
+| 09-op r,r.gb             | ✓      |
+| 10-bit ops.gb            | ✓      |
+| 11-op a,(hl).gb          | ✓      |
+
 ## Resources
 
 - http://pastraiser.com/cpu/gameboy/gameboy_opcodes.html
