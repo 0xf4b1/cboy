@@ -6,15 +6,20 @@ jobs:
   build:
 
     runs-on: macos-latest
-    
+
     steps:
     - uses: actions/checkout@v1
     - name: build
       run: |
         mkdir build && cd build
-        cmake -DTEST=1 ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DTEST=1 ..
         make
     - name: test
       run: |
         cd build
         make test
+    - name: upload
+      uses: actions/upload-artifact@v1
+      with:
+        name: cboy
+        path: build/cboy/cboy

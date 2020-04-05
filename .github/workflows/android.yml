@@ -19,3 +19,8 @@ jobs:
       run: |
         cd anboy
         ./gradlew build
+    - name: upload
+      uses: actions/upload-artifact@v1
+      with:
+        name: anboy
+        path: anboy/anboy/build/outputs/apk/debug/anboy-debug.apk
