@@ -15,7 +15,7 @@ if(${RENDERER} STREQUAL OPENGL)
     set(RENDERER_LIBS ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 elseif(${RENDERER} STREQUAL FRAMEBUFFER)
-    set(RENDERER_SOURCES framebuffer.c)
+    list(APPEND cboy_SOURCE_FILES framebuffer.c)
 endif()
 
 if(UNIX AND NOT APPLE)

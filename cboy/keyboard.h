@@ -11,4 +11,4 @@ void normal_key_handler(unsigned char key, int x, int y);
 
 void normal_key_up_handler(unsigned char key, int x, int y);
 
-#endif // CBOY_CONTROLS_H
+#endif // CBOY_KEYBOARD_H

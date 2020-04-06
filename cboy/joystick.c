@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <fcntl.h>
-#include <gameboy.h>
 #include <linux/joystick.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#include "controls.h"
+#include <controls.h>
+#include <gameboy.h>
 
 int js_dev = -1;
 

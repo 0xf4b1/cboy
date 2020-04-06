@@ -48,6 +48,8 @@ void special_key_up_handler(int key, int x, int y) {
         load_state();
     else if (key == GLUT_KEY_F6)
         save_state();
+    else if (key == GLUT_KEY_F11)
+        toggle_fullscreen();
     else
         handle_key(key, release);
 }

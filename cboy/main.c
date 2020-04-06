@@ -10,6 +10,7 @@
 #endif
 
 #include "gameboy.h"
+#include "renderer.h"
 
 #ifdef linux
 #include "joystick.h"
