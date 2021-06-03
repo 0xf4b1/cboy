@@ -1,0 +1,17 @@
+name: switch
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          /opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-cmake -S. -Bbuild -DSWITCH=ON -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build build
+      - uses: actions/upload-artifact@v1
+        with:
+          name: nxboy.nro
+          path: build/nxboy/nxboy.nro
