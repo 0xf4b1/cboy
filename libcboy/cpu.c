@@ -2,6 +2,7 @@
 
 #include "display.h"
 #include "gameboy.h"
+#include "timer.h"
 #include "instructions/opcodes.h"
 
 unsigned char fetch_instruction() {
@@ -87,8 +88,11 @@ unsigned char next_instruction() {
 }
 
 void next_instructions(int cycles) {
+    unsigned char cur_cycles;
     while (cycles > 0) {
-        cycles -= next_instruction();
+        cur_cycles = next_instruction();
+        timer(cur_cycles);
+        cycles -= cur_cycles;
     }
 }
 

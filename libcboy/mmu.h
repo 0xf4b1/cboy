@@ -26,6 +26,8 @@ bool window_display_enable();
 
 unsigned short get_tile(unsigned char x, unsigned char y, bool window);
 
+void set_interrupt(unsigned char value);
+
 void set_vblank();
 
 #endif // LIBCBOY_MMU_H
