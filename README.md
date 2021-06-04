@@ -3,6 +3,7 @@
 ![](https://github.com/0xf4b1/cboy/workflows/linux/badge.svg)
 ![](https://github.com/0xf4b1/cboy/workflows/macos/badge.svg)
 ![](https://github.com/0xf4b1/cboy/workflows/android/badge.svg)
+![](https://github.com/0xf4b1/cboy/workflows/switch/badge.svg)
 [![GitHub release](https://img.shields.io/github/v/release/0xf4b1/cboy.svg)](https://github.com/0xf4b1/cboy/releases)
 [![GitHub](https://img.shields.io/github/license/0xf4b1/cboy.svg)](LICENSE)
 
