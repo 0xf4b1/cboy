@@ -14,17 +14,47 @@ Gameboy gameboy = {.controls = 0xFF,
                    .mmu.mbc.ram_bank_number = 0,
                    .mmu.mbc.rom_ram_select = 0};
 
-void inject_bootrom() {
-    gameboy.mmu.mbc.rom[0x00] = 0x31;
-    gameboy.mmu.mbc.rom[0x01] = 0xFE;
-    gameboy.mmu.mbc.rom[0x02] = 0xFF;
-    gameboy.mmu.mbc.rom[0x03] = 0xC3;
-    gameboy.mmu.mbc.rom[0x04] = 0xFC;
-    gameboy.mmu.mbc.rom[0x05] = 0x00;
-    gameboy.mmu.mbc.rom[0xFC] = 0x3E;
-    gameboy.mmu.mbc.rom[0xFD] = 0x01;
-    gameboy.mmu.mbc.rom[0xFE] = 0xE0;
-    gameboy.mmu.mbc.rom[0xFF] = 0x50;
+void init() {
+    memset(gameboy.mmu.ram, 0, 0x8000);
+
+    gameboy.cpu.PC = 0x100;
+    gameboy.cpu.SP = 0xfffe;
+    set_AF(0x11b0);
+    set_BC(0x13);
+    set_DE(0xd8);
+    set_HL(0x14d);
+
+    write_mmu(0xFF05, 0x0);
+    write_mmu(0xFF06, 0x0);
+    write_mmu(0xFF07, 0x0);
+    write_mmu(0xFF10, 0x80);
+    write_mmu(0xFF11, 0xbf);
+    write_mmu(0xFF12, 0xf3);
+    write_mmu(0xFF14, 0xbf);
+    write_mmu(0xFF16, 0x3f);
+    write_mmu(0xFF17, 0x0);
+    write_mmu(0xFF19, 0xbf);
+    write_mmu(0xFF1a, 0x7f);
+    write_mmu(0xFF1b, 0xff);
+    write_mmu(0xFF1c, 0x9f);
+    write_mmu(0xFF1e, 0xbf);
+    write_mmu(0xFF20, 0xff);
+    write_mmu(0xFF21, 0x0);
+    write_mmu(0xFF22, 0x0);
+    write_mmu(0xFF23, 0xbf);
+    write_mmu(0xFF24, 0x77);
+    write_mmu(0xFF25, 0xf3);
+    write_mmu(0xFF26, 0xf1);
+    write_mmu(0xFF40, 0x91);
+    write_mmu(0xFF42, 0x0);
+    write_mmu(0xFF43, 0x0);
+    write_mmu(0xFF45, 0x0);
+    write_mmu(0xFF47, 0xfc);
+    write_mmu(0xFF48, 0xff);
+    write_mmu(0xFF49, 0xff);
+    write_mmu(0xFF4a, 0x0);
+    write_mmu(0xFF4b, 0x0);
+    write_mmu(0xFFFF, 0x0);
 }
 
 void load_rom(char *path) {
@@ -57,7 +87,7 @@ void load_rom(char *path) {
     fread(gameboy.mmu.mbc.rom, fileLen, 1, file);
     fclose(file);
 
-    inject_bootrom();
+    init();
 }
 
 void load_state() {
