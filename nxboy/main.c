@@ -105,3 +105,7 @@ int main(int argc, char *argv[]) {
     framebufferClose(&fb);
     return 0;
 }
+
+void serial_print(char c) {
+    // no output
+}
