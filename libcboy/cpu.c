@@ -28,16 +28,19 @@ unsigned char fetch_instruction() {
  */
 void check_interrupt() {
 
-    if (!gameboy.cpu.ime) {
-        return;
-    }
-
     unsigned char interrupt_enable = read_mmu(0xFFFF);
     unsigned char interrupt_flag = read_mmu(0xFF0F);
 
     for (unsigned char i = 0; i < 5; i++) {
         // check for interrupt enable and interrupt request being set
         if (interrupt_enable >> i & 1 && interrupt_flag >> i & 1) {
+
+            if (gameboy.cpu.halt)
+                gameboy.cpu.halt = false;
+
+            if (!gameboy.cpu.ime)
+                return;
+
             // reset corresponding bit
             write_mmu(0xFF0F, read_mmu(0xFF0F) & ~(1 << i));
 
@@ -51,6 +54,7 @@ void check_interrupt() {
 
             // call corresponding interrupt address
             gameboy.cpu.PC = 0x40 + i * 8;
+            gameboy.cpu.halt = false;
         }
     }
 }
@@ -58,6 +62,9 @@ void check_interrupt() {
 unsigned char next_instruction() {
 
     check_interrupt();
+
+    if (gameboy.cpu.halt)
+        return 12;
 
     unsigned char inst = fetch_instruction();
 

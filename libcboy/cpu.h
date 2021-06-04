@@ -25,6 +25,7 @@ typedef struct {
     unsigned short PC;
 
     bool ime;
+    bool halt;
 } Cpu;
 
 Frame next_frame();

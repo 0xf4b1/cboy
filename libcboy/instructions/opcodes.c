@@ -86,7 +86,7 @@ unsigned char decode_and_execute(unsigned char opcode, unsigned short arg) {
         if (opcode % 8 == 6) {
             if (opcode == 0x76) {
                 // HALT
-                return NOP();
+                return HALT();
             }
             // LD X,(HL)
             *registers[(opcode - 0x40) / 8] = read_mmu(HL());

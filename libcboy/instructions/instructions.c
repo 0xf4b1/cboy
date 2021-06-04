@@ -9,6 +9,11 @@
  */
 unsigned char NOP() { return 4; }
 
+unsigned char HALT() {
+    gameboy.cpu.halt = true;
+    return 4;
+}
+
 /*
  * PUSH nn
  * Description:

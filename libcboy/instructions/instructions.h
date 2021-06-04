@@ -4,6 +4,7 @@
 #define LIBCBOY_INSTRUCTIONS_H
 
 unsigned char NOP();
+unsigned char HALT();
 void PUSH(unsigned short value);
 unsigned short POP();
 unsigned char JP(unsigned short addr);
