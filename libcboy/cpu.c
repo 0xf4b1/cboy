@@ -126,7 +126,7 @@ Frame next_frame() {
     set_vblank();
     draw();
 
-    for (unsigned char i = 144; i < 153; i++) {
+    for (unsigned char i = 144; i <= 154; i++) {
         set_ly(i);
         // MODE 1
         // 4560 clks
