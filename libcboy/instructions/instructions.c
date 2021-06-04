@@ -292,8 +292,8 @@ unsigned short ADD_HL_n(unsigned short a, unsigned short b) {
  * H - Set or reset according to operation.
  * C - Set or reset according to operation.
  */
-unsigned char ADD_SP_r8(char value) {
-    unsigned short res = (gameboy.cpu.SP + value) & 0xFFFF;
+unsigned char ADD_SP_r8(unsigned char value) {
+    unsigned short res = (gameboy.cpu.SP + (char)value) & 0xFFFF;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H((gameboy.cpu.SP & 0xF) + (value & 0xF) > 0xF);
@@ -822,8 +822,8 @@ unsigned char LD_A_a16(unsigned short value) {
  * H - Set or reset according to operation.
  * C - Set or reset according to operation.
  */
-unsigned char LD_HL_SP_r8(char value) {
-    unsigned short res = gameboy.cpu.SP + value;
+unsigned char LD_HL_SP_r8(unsigned char value) {
+    unsigned short res = gameboy.cpu.SP + (char)value;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H((gameboy.cpu.SP & 0xF) + (value & 0xF) > 0xF);
