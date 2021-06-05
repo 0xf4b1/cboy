@@ -5,8 +5,6 @@
 
 unsigned char NOP();
 unsigned char HALT();
-void PUSH(unsigned short value);
-unsigned short POP();
 unsigned char JP(unsigned short addr);
 unsigned char JP_NZ_a16(unsigned short value);
 unsigned char JP_NC_a16(unsigned short value);
@@ -29,19 +27,7 @@ unsigned char RET_NC();
 unsigned char RET_Z();
 unsigned char RET_NZ();
 unsigned char RETI();
-unsigned char RST(unsigned char addr);
-unsigned char ADD(unsigned char a, unsigned char b);
-unsigned short ADD_HL_n(unsigned short a, unsigned short b);
 unsigned char ADD_SP_r8(char value);
-unsigned char ADC(unsigned char a, unsigned char b);
-unsigned char SUB(unsigned char a, unsigned char b);
-unsigned char SBC(unsigned char a, unsigned char b);
-unsigned char AND(unsigned char a, unsigned char b);
-unsigned char INC(unsigned char reg);
-unsigned char DEC(unsigned char reg);
-unsigned char OR(unsigned char a, unsigned char b);
-unsigned char XOR(unsigned char a, unsigned char b);
-unsigned char CP(unsigned char a, unsigned char b);
 unsigned char RLCA();
 unsigned char RRCA();
 unsigned char RLA();
@@ -60,8 +46,8 @@ unsigned char LDD_HL_A();
 unsigned char LDD_A_HL();
 unsigned char LDH_n_A(unsigned char addr);
 unsigned char LDH_A_n(unsigned char addr);
-unsigned char LD_A_C();
-unsigned char LD_C_A();
+unsigned char LD_A_Cp();
+unsigned char LD_Cp_A();
 unsigned char LD_a16_SP(unsigned short addr);
 unsigned char LD_a16_A(unsigned short value);
 unsigned char LD_A_a16(unsigned short value);
@@ -69,5 +55,86 @@ unsigned char LD_HL_SP_r8(char value);
 unsigned char LD_SP_HL();
 unsigned char DI();
 unsigned char EI();
+unsigned char INC_HLp();
+unsigned char DEC_HLp();
+unsigned char LD_HLp_d8();
+
+#define DEFINE_OP_REG(OP, REG) \
+        unsigned char OP ## _ ## REG();
+
+#define DEFINE_OP_REG1_REG2(OP, REG1, REG2) \
+        unsigned char OP ## _ ## REG1 ## _ ## REG2();
+
+#define DEFINE_r16(REG) \
+        DEFINE_OP_REG(INC, REG) \
+        DEFINE_OP_REG(DEC, REG) \
+        DEFINE_OP_REG1_REG2(ADD, HL, REG) \
+        DEFINE_OP_REG1_REG2(LD, REG, d16)
+
+DEFINE_r16(BC)
+DEFINE_r16(DE)
+DEFINE_r16(HL)
+DEFINE_r16(SP)
+
+#define DEFINE_STACK(REG) \
+        DEFINE_OP_REG(POP, REG) \
+        DEFINE_OP_REG(PUSH, REG)
+
+DEFINE_STACK(BC)
+DEFINE_STACK(DE)
+DEFINE_STACK(HL)
+DEFINE_STACK(AF)
+
+#define DEFINE_r8(REG) \
+        DEFINE_OP_REG(INC, REG) \
+        DEFINE_OP_REG(DEC, REG) \
+        DEFINE_OP_REG1_REG2(LD, REG, d8) \
+        DEFINE_OP_REG1_REG2(LD, REG, B) \
+        DEFINE_OP_REG1_REG2(LD, REG, C) \
+        DEFINE_OP_REG1_REG2(LD, REG, D) \
+        DEFINE_OP_REG1_REG2(LD, REG, E) \
+        DEFINE_OP_REG1_REG2(LD, REG, H) \
+        DEFINE_OP_REG1_REG2(LD, REG, L) \
+        DEFINE_OP_REG1_REG2(LD, REG, HLp) \
+        DEFINE_OP_REG1_REG2(LD, HLp, REG) \
+        DEFINE_OP_REG1_REG2(LD, REG, A) \
+        DEFINE_OP_REG(ADD, REG) \
+        DEFINE_OP_REG(ADC, REG) \
+        DEFINE_OP_REG(SUB, REG) \
+        DEFINE_OP_REG(SBC, REG) \
+        DEFINE_OP_REG(AND, REG) \
+        DEFINE_OP_REG(XOR, REG) \
+        DEFINE_OP_REG(OR, REG) \
+        DEFINE_OP_REG(CP, REG)
+
+DEFINE_r8(B)
+DEFINE_r8(C)
+DEFINE_r8(D)
+DEFINE_r8(E)
+DEFINE_r8(H)
+DEFINE_r8(L)
+DEFINE_r8(A)
+
+#define DEFINE_OP(OP) \
+        DEFINE_OP_REG(OP, HLp) \
+        DEFINE_OP_REG(OP, d8)
+
+DEFINE_OP(ADD)
+DEFINE_OP(ADC)
+DEFINE_OP(SUB)
+DEFINE_OP(SBC)
+DEFINE_OP(AND)
+DEFINE_OP(XOR)
+DEFINE_OP(OR)
+DEFINE_OP(CP)
+
+DEFINE_OP_REG(RST, 0x0)
+DEFINE_OP_REG(RST, 0x8)
+DEFINE_OP_REG(RST, 0x10)
+DEFINE_OP_REG(RST, 0x18)
+DEFINE_OP_REG(RST, 0x20)
+DEFINE_OP_REG(RST, 0x28)
+DEFINE_OP_REG(RST, 0x30)
+DEFINE_OP_REG(RST, 0x38)
 
 #endif // LIBCBOY_INSTRUCTIONS_H

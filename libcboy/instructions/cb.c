@@ -14,7 +14,7 @@
  * H - Reset.
  * C - Contains old bit 7 data.
  */
-unsigned char RLC(unsigned char value) {
+static inline unsigned char RLC(unsigned char value) {
     bool c = (value >> 7) & 1;
     value = ((value << 1) | c) & 0xFF;
     set_flag_Z(value == 0);
@@ -36,7 +36,7 @@ unsigned char RLC(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 0 data
  */
-unsigned char RRC(unsigned char value) {
+static inline unsigned char RRC(unsigned char value) {
     bool c = value & 1;
     value = ((value >> 1) | (c << 7)) & 0xFF;
     set_flag_Z(value == 0);
@@ -58,7 +58,7 @@ unsigned char RRC(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 7 data.
  */
-unsigned char RL(unsigned char value) {
+static inline unsigned char RL(unsigned char value) {
     bool c = (value >> 7) & 1;
     value = ((value << 1) | flag_C()) & 0xFF;
     set_flag_Z(value == 0);
@@ -80,7 +80,7 @@ unsigned char RL(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 0 data.
  */
-unsigned char RR(unsigned char value) {
+static inline unsigned char RR(unsigned char value) {
     bool c = value & 1;
     value = ((value >> 1) | (flag_C() << 7)) & 0xFF;
     set_flag_Z(value == 0);
@@ -102,7 +102,7 @@ unsigned char RR(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 7 data.
  */
-unsigned char SLA(unsigned char value) {
+static inline unsigned char SLA(unsigned char value) {
     bool c = value >> 7 & 1;
     value = value << 1 & 0xFF;
     set_flag_Z(value == 0);
@@ -124,9 +124,9 @@ unsigned char SLA(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 0 data.
  */
-unsigned char SRA(unsigned char value) {
+static inline unsigned char SRA(unsigned char value) {
     bool c = value & 1;
-    value = (value >> 1 | value & (1 << 7)) & 0xFF;
+    value = (value >> 1 | (value & (1 << 7))) & 0xFF;
     set_flag_Z(value == 0);
     set_flag_N(false);
     set_flag_H(false);
@@ -146,7 +146,7 @@ unsigned char SRA(unsigned char value) {
  * H - Reset.
  * C - Reset.
  */
-unsigned char SWAP(unsigned char value) {
+static inline unsigned char SWAP(unsigned char value) {
     unsigned char res = (value << 4 | value >> 4) & 0xFF;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -167,7 +167,7 @@ unsigned char SWAP(unsigned char value) {
  * H - Reset.
  * C - Contains old bit 0 data
  */
-unsigned char SRL(unsigned char value) {
+static inline unsigned char SRL(unsigned char value) {
     unsigned char res = value >> 1;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -188,7 +188,7 @@ unsigned char SRL(unsigned char value) {
  * H - Set.
  * C - Not affected.
  */
-unsigned char BIT(unsigned char value, unsigned char i) {
+static inline unsigned char BIT(unsigned char value, unsigned char i) {
     set_flag_Z((value >> i & 1) == 0);
     set_flag_N(false);
     set_flag_H(true);
@@ -204,7 +204,7 @@ unsigned char BIT(unsigned char value, unsigned char i) {
  * Flags affected:
  * None.
  */
-unsigned char RES(unsigned char value, unsigned char i) { return value & ~(1 << i); }
+static inline unsigned char RES(unsigned char value, unsigned char i) { return value & ~(1 << i); }
 
 /*
  * SET b,r
@@ -215,4 +215,90 @@ unsigned char RES(unsigned char value, unsigned char i) { return value & ~(1 << 
  * Flags affected:
  * None.
  */
-unsigned char SET(unsigned char value, unsigned char i) { return value | 1 << i; }
+static inline unsigned char SET(unsigned char value, unsigned char i) { return value | 1 << i; }
+
+#define DEFINE_OP_REG(OP, REG) \
+        void OP ## _ ## REG() { \
+            gameboy.cpu.REG = OP(gameboy.cpu.REG); \
+        }
+
+#define DEFINE_CB_OPS(REG) \
+        DEFINE_OP_REG(RLC, REG) \
+        DEFINE_OP_REG(RRC, REG) \
+        DEFINE_OP_REG(RL, REG) \
+        DEFINE_OP_REG(RR, REG) \
+        DEFINE_OP_REG(SLA, REG) \
+        DEFINE_OP_REG(SRA, REG) \
+        DEFINE_OP_REG(SWAP, REG) \
+        DEFINE_OP_REG(SRL, REG)
+
+#define DEFINE_BIT_N_REG(N, REG) \
+        void BIT_ ## N ## _ ## REG() { \
+            gameboy.cpu.REG = BIT(gameboy.cpu.REG, N); \
+        } \
+        \
+        void RES_ ## N ## _ ## REG() { \
+            gameboy.cpu.REG = RES(gameboy.cpu.REG, N); \
+        } \
+        \
+        void SET_ ## N ## _ ## REG() { \
+            gameboy.cpu.REG = SET(gameboy.cpu.REG, N); \
+        }
+
+#define DEFINE_BIT_REG(REG) \
+        DEFINE_BIT_N_REG(0, REG) \
+        DEFINE_BIT_N_REG(1, REG) \
+        DEFINE_BIT_N_REG(2, REG) \
+        DEFINE_BIT_N_REG(3, REG) \
+        DEFINE_BIT_N_REG(4, REG) \
+        DEFINE_BIT_N_REG(5, REG) \
+        DEFINE_BIT_N_REG(6, REG) \
+        DEFINE_BIT_N_REG(7, REG)
+
+#define DEFINE_CB(REG) \
+        DEFINE_CB_OPS(REG) \
+        DEFINE_BIT_REG(REG)
+
+DEFINE_CB(B)
+DEFINE_CB(C)
+DEFINE_CB(D)
+DEFINE_CB(E)
+DEFINE_CB(H)
+DEFINE_CB(L)
+DEFINE_CB(A)
+
+#define DEFINE_OP_HL(OP) \
+        void OP ## _HL() { \
+            write_mmu(HL(), OP(read_mmu(HL()))); \
+        }
+
+DEFINE_OP_HL(RLC)
+DEFINE_OP_HL(RRC)
+DEFINE_OP_HL(RL)
+DEFINE_OP_HL(RR)
+DEFINE_OP_HL(SLA)
+DEFINE_OP_HL(SRA)
+DEFINE_OP_HL(SWAP)
+DEFINE_OP_HL(SRL)
+
+#define DEFINE_BIT_N_HL(N) \
+        void BIT_ ## N ## _HL() { \
+            write_mmu(HL(), BIT(read_mmu(HL()), N)); \
+        } \
+        \
+        void RES_ ## N ## _HL() { \
+            write_mmu(HL(), RES(read_mmu(HL()), N)); \
+        } \
+        \
+        void SET_ ## N ## _HL() { \
+            write_mmu(HL(), SET(read_mmu(HL()), N)); \
+        }
+
+DEFINE_BIT_N_HL(0)
+DEFINE_BIT_N_HL(1)
+DEFINE_BIT_N_HL(2)
+DEFINE_BIT_N_HL(3)
+DEFINE_BIT_N_HL(4)
+DEFINE_BIT_N_HL(5)
+DEFINE_BIT_N_HL(6)
+DEFINE_BIT_N_HL(7)

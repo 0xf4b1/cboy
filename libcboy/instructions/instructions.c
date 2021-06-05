@@ -22,7 +22,7 @@ unsigned char HALT() {
  * Use with:
  * nn = AF,BC,DE,HL
  */
-void PUSH(unsigned short value) {
+static inline void PUSH(unsigned short value) {
     write_mmu(gameboy.cpu.SP - 1, value >> 8);
     write_mmu(gameboy.cpu.SP - 2, value & 0xFF);
     gameboy.cpu.SP -= 2;
@@ -36,7 +36,7 @@ void PUSH(unsigned short value) {
  * Use with:
  * nn = AF,BC,DE,HL
  */
-unsigned short POP() {
+static inline unsigned short POP() {
     unsigned short value = (read_mmu(gameboy.cpu.SP + 1) << 8 | read_mmu(gameboy.cpu.SP)) & 0xFFFF;
     gameboy.cpu.SP += 2;
     return value;
@@ -103,7 +103,7 @@ unsigned char JP_HL() {
  * Use with:
  * n = one byte signed immediate value
  */
-void JR(unsigned char value) { gameboy.cpu.PC += (value ^ 0x80) - 0x80; }
+static inline void JR(unsigned char value) { gameboy.cpu.PC += (value ^ 0x80) - 0x80; }
 
 unsigned char JR_C_r8(unsigned char value) {
     if (flag_C()) {
@@ -238,7 +238,7 @@ unsigned char RETI() {
     return 16;
 }
 
-unsigned char RST(unsigned char addr) {
+static inline unsigned char RST(unsigned char addr) {
     PUSH(gameboy.cpu.PC);
     gameboy.cpu.PC = addr;
     return 16;
@@ -256,7 +256,7 @@ unsigned char RST(unsigned char addr) {
  * H - Set if carry from bit 3.
  * C - Set if carry from bit 7.
  */
-unsigned char ADD(unsigned char a, unsigned char b) {
+static inline unsigned char ADD(unsigned char a, unsigned char b) {
     unsigned char res = (a + b) & 0xFF;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -277,8 +277,8 @@ unsigned char ADD(unsigned char a, unsigned char b) {
  * H - Set if carry from bit 11.
  * C - Set if carry from bit 15.
  */
-unsigned short ADD_HL_n(unsigned short a, unsigned short b) {
-    unsigned short res = a + b & 0xFFFF;
+static inline unsigned short ADD_HL_n(unsigned short a, unsigned short b) {
+    unsigned short res = (a + b) & 0xFFFF;
     set_flag_N(false);
     set_flag_H((a & 0xFFF) + (b & 0xFFF) > 0xFFF);
     set_flag_C(a + b > 0xFFFF);
@@ -319,7 +319,7 @@ unsigned char ADD_SP_r8(unsigned char value) {
  * H - Set if carry from bit 3.
  * C - Set if carry from bit 7.
  */
-unsigned char ADC(unsigned char a, unsigned char b) {
+static inline unsigned char ADC(unsigned char a, unsigned char b) {
     unsigned char res = (a + b + flag_C()) & 0xFF;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -340,7 +340,7 @@ unsigned char ADC(unsigned char a, unsigned char b) {
  * H - Set if no borrow from bit 4.
  * C - Set if no borrow.
  */
-unsigned char SUB(unsigned char a, unsigned char b) {
+static inline unsigned char SUB(unsigned char a, unsigned char b) {
     unsigned char res = (a - b) & 0xFF;
     set_flag_Z(res == 0);
     set_flag_N(true);
@@ -361,7 +361,7 @@ unsigned char SUB(unsigned char a, unsigned char b) {
  * H - Set if no borrow from bit 4.
  * C - Set if no borrow.
  */
-unsigned char SBC(unsigned char a, unsigned char b) {
+static inline unsigned char SBC(unsigned char a, unsigned char b) {
     unsigned char res = (a - b - flag_C()) & 0xFF;
     set_flag_Z(res == 0);
     set_flag_N(true);
@@ -382,7 +382,7 @@ unsigned char SBC(unsigned char a, unsigned char b) {
  * H - Set.
  * C - Reset.
  */
-unsigned char AND(unsigned char a, unsigned char b) {
+static inline unsigned char AND(unsigned char a, unsigned char b) {
     unsigned char res = a & b;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -403,8 +403,8 @@ unsigned char AND(unsigned char a, unsigned char b) {
  * H - Set if carry from bit 3.
  * C - Not affected.
  */
-unsigned char INC(unsigned char reg) {
-    set_flag_H((reg & 0xF) + 1 & 0x10);
+static inline unsigned char INC(unsigned char reg) {
+    set_flag_H(((reg & 0xF) + 1) & 0x10);
     reg = (reg + 1) & 0xFF;
     set_flag_Z(reg == 0);
     set_flag_N(false);
@@ -423,7 +423,7 @@ unsigned char INC(unsigned char reg) {
  * H - Set if no borrow from bit 4.
  * C - Not affected.
  */
-unsigned char DEC(unsigned char reg) {
+static inline unsigned char DEC(unsigned char reg) {
     set_flag_H((reg & 0xF) - 1 < 0);
     reg = (reg - 1) & 0xFF;
     set_flag_Z(reg == 0);
@@ -443,7 +443,7 @@ unsigned char DEC(unsigned char reg) {
  * H - Reset.
  * C - Reset.
  */
-unsigned char OR(unsigned char a, unsigned char b) {
+static inline unsigned char OR(unsigned char a, unsigned char b) {
     unsigned char res = a | b;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -464,7 +464,7 @@ unsigned char OR(unsigned char a, unsigned char b) {
  * H - Reset.
  * C - Reset.
  */
-unsigned char XOR(unsigned char a, unsigned char b) {
+static inline unsigned char XOR(unsigned char a, unsigned char b) {
     unsigned char res = a ^ b;
     set_flag_Z(res == 0);
     set_flag_N(false);
@@ -487,7 +487,7 @@ unsigned char XOR(unsigned char a, unsigned char b) {
  * H - Set if no borrow from bit 4.
  * C - Set for no borrow. (Set if A < n.)
  */
-unsigned char CP(unsigned char a, unsigned char b) {
+static inline unsigned char CP(unsigned char a, unsigned char b) {
     unsigned char res = a - b;
     set_flag_Z(res == 0);
     set_flag_N(true);
@@ -693,7 +693,7 @@ unsigned char LD_DE_A() {
  */
 unsigned char LDI_HL_A() {
     write_mmu(HL(), gameboy.cpu.A);
-    set_HL(HL() + 1 & 0xFFFF);
+    set_HL((HL() + 1) & 0xFFFF);
     return 8;
 }
 
@@ -705,7 +705,7 @@ unsigned char LDI_HL_A() {
  */
 unsigned char LDI_A_HL() {
     gameboy.cpu.A = read_mmu(HL());
-    set_HL(HL() + 1 & 0xFFFF);
+    set_HL((HL() + 1) & 0xFFFF);
     return 8;
 }
 
@@ -729,7 +729,7 @@ unsigned char LDD_HL_A() {
  */
 unsigned char LDD_A_HL() {
     gameboy.cpu.A = read_mmu(HL());
-    set_HL(HL() - 1 & 0xFFFF);
+    set_HL((HL() - 1) & 0xFFFF);
     return 8;
 }
 
@@ -763,7 +763,7 @@ unsigned char LDH_A_n(unsigned char addr) {
  * Put value at address $FF00 + register C into A.
  * Same as: LD A,($FF00+C)
  */
-unsigned char LD_A_C() {
+unsigned char LD_A_Cp() {
     gameboy.cpu.A = read_mmu(0xFF00 + gameboy.cpu.C);
     return 4;
 }
@@ -773,7 +773,7 @@ unsigned char LD_A_C() {
  * Description:
  * Put A into address $FF00 + register C.
  */
-unsigned char LD_C_A() {
+unsigned char LD_Cp_A() {
     write_mmu(0xFF00 + gameboy.cpu.C, gameboy.cpu.A);
     return 8;
 }
@@ -874,3 +874,201 @@ unsigned char EI() {
     gameboy.cpu.ime = true;
     return 4;
 }
+
+// INC (HL)
+unsigned char INC_HLp() {
+    write_mmu(HL(), INC(read_mmu(HL())));
+    return 12;
+}
+
+// DEC (HL)
+unsigned char DEC_HLp() {
+    write_mmu(HL(), DEC(read_mmu(HL())));
+    return 12;
+}
+
+// LD (HL),d8
+unsigned char LD_HLp_d8(unsigned char arg) {
+    write_mmu(HL(), arg);
+    return 12;
+}
+
+// LD r16,d16
+#define DEFINE_r16_d16(REG) \
+        unsigned char LD_ ## REG ## _d16(unsigned short arg) { \
+            set_##REG(arg); \
+            return 12; \
+        }
+
+// INC r8
+#define DEFINE_INC(REG) \
+        unsigned char INC_ ## REG () { \
+            set_##REG(REG() + 1); \
+            return 8; \
+        }
+
+// DEC r8
+#define DEFINE_DEC(REG) \
+        unsigned char DEC_ ## REG () { \
+            set_##REG(REG() - 1); \
+            return 8; \
+        }
+
+// ADD HL,r16
+#define DEFINE_ADD_HL_r16(REG) \
+        unsigned char ADD_HL_ ## REG () { \
+            set_HL(ADD_HL_n(HL(), REG())); \
+            return 8; \
+        }
+
+#define DEFINE_r16(REG) \
+        DEFINE_r16_d16(REG) \
+        DEFINE_INC(REG) \
+        DEFINE_DEC(REG) \
+        DEFINE_ADD_HL_r16(REG)
+
+DEFINE_r16(BC)
+DEFINE_r16(DE)
+DEFINE_r16(HL)
+DEFINE_r16(SP)
+
+// POP r16
+#define DEFINE_POP_r16(REG) \
+        unsigned char POP_ ## REG () { \
+            set_##REG(POP()); \
+            return 12; \
+        }
+
+// PUSH r16
+#define DEFINE_PUSH_r16(REG) \
+        unsigned char PUSH_ ## REG () { \
+            PUSH(REG()); \
+            return 16; \
+        }
+
+#define DEFINE_STACK(REG) \
+        DEFINE_POP_r16(REG) \
+        DEFINE_PUSH_r16(REG)
+
+DEFINE_STACK(BC)
+DEFINE_STACK(DE)
+DEFINE_STACK(HL)
+DEFINE_STACK(AF)
+
+// INC r8
+#define DEFINE_INC_r8(REG) \
+        unsigned char INC_ ## REG () { \
+            gameboy.cpu.REG = INC(gameboy.cpu.REG); \
+            return 8; \
+        }
+
+// DEC r8
+#define DEFINE_DEC_r8(REG) \
+        unsigned char DEC_ ## REG () { \
+            gameboy.cpu.REG = DEC(gameboy.cpu.REG); \
+            return 8; \
+        }
+
+// LD r8,d8
+#define DEFINE_LD_r8_d8(REG) \
+        unsigned char LD_ ## REG ## _d8(unsigned char arg) { \
+            gameboy.cpu.REG = arg; \
+            return 8; \
+        }
+
+// LD r8,r8
+#define DEFINE_LD_r8_r8(REG1, REG2) \
+        unsigned char LD_ ## REG1 ## _ ## REG2 () { \
+            gameboy.cpu.REG1 = gameboy.cpu.REG2; \
+            return 4; \
+        }
+
+// LD r8,(HL)
+#define DEFINE_LD_r8_HLp(REG) \
+        unsigned char LD_ ## REG ## _HLp () { \
+            gameboy.cpu.REG = read_mmu(HL()); \
+            return 8; \
+        }
+
+// LD (HL),r8
+#define DEFINE_LD_HLp_r8(REG) \
+        unsigned char LD_HLp_ ## REG () { \
+            write_mmu(HL(), gameboy.cpu.REG); \
+            return 8; \
+        }
+
+#define DEFINE_OP_r8(OP, REG) \
+        unsigned char OP ## _ ## REG () { \
+            gameboy.cpu.A = OP(gameboy.cpu.A, gameboy.cpu.REG); \
+            return 4; \
+        }
+
+#define DEFINE_OP_d8(OP) \
+        unsigned char OP ## _d8 (unsigned char arg) { \
+            gameboy.cpu.A = OP(gameboy.cpu.A, arg); \
+            return 8; \
+        }
+
+#define DEFINE_OP_HLp(OP) \
+        unsigned char OP ## _HLp () { \
+            gameboy.cpu.A = OP(gameboy.cpu.A, read_mmu(HL())); \
+            return 8; \
+        }
+
+#define DEFINE_OP(OP) \
+        DEFINE_OP_HLp(OP) \
+        DEFINE_OP_d8(OP)
+
+DEFINE_OP(ADD)
+DEFINE_OP(ADC)
+DEFINE_OP(SUB)
+DEFINE_OP(SBC)
+DEFINE_OP(AND)
+DEFINE_OP(XOR)
+DEFINE_OP(OR)
+DEFINE_OP(CP)
+
+#define DEFINE_r8(REG) \
+        DEFINE_INC_r8(REG) \
+        DEFINE_DEC_r8(REG) \
+        DEFINE_LD_r8_d8(REG) \
+        DEFINE_LD_r8_r8(REG, B) \
+        DEFINE_LD_r8_r8(REG, C) \
+        DEFINE_LD_r8_r8(REG, D) \
+        DEFINE_LD_r8_r8(REG, E) \
+        DEFINE_LD_r8_r8(REG, H) \
+        DEFINE_LD_r8_r8(REG, L) \
+        DEFINE_LD_r8_r8(REG, A) \
+        DEFINE_LD_r8_HLp(REG) \
+        DEFINE_LD_HLp_r8(REG) \
+        DEFINE_OP_r8(ADD, REG) \
+        DEFINE_OP_r8(ADC, REG) \
+        DEFINE_OP_r8(SUB, REG) \
+        DEFINE_OP_r8(SBC, REG) \
+        DEFINE_OP_r8(AND, REG) \
+        DEFINE_OP_r8(XOR, REG) \
+        DEFINE_OP_r8(OR, REG) \
+        DEFINE_OP_r8(CP, REG)
+
+DEFINE_r8(B)
+DEFINE_r8(C)
+DEFINE_r8(D)
+DEFINE_r8(E)
+DEFINE_r8(H)
+DEFINE_r8(L)
+DEFINE_r8(A)
+
+#define DEFINE_RST(VALUE) \
+        unsigned char RST_##VALUE() { \
+            RST(VALUE); \
+            return 16; \
+        }
+
+DEFINE_RST(0x0)
+DEFINE_RST(0x8)
+DEFINE_RST(0x10)
+DEFINE_RST(0x18)
+DEFINE_RST(0x20)
+DEFINE_RST(0x28)
+DEFINE_RST(0x30)
+DEFINE_RST(0x38)

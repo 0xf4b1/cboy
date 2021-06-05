@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "gameboy.h"
-#include "instructions/opcodes.h"
 
 Gameboy gameboy = {.controls = 0xFF,
                    .cpu.SP = 0xFFFF,
@@ -58,8 +57,6 @@ void init() {
 }
 
 void load_rom(char *path) {
-    init_ops();
-
     printf("ROM path: %s\n", path);
 
     char *filename = malloc(strlen(path) + 1);
