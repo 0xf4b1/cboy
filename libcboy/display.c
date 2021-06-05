@@ -6,13 +6,13 @@
 #define WIDTH 160
 #define HEIGHT 144
 
-unsigned char background[256][256];
-unsigned char window[256][256];
+static unsigned char background[256][256];
+static unsigned char window[256][256];
 
-unsigned char scy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-unsigned char scx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-unsigned char wy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-unsigned char wx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+static unsigned char scy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+static unsigned char scx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+static unsigned char wy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+static unsigned char wx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
 
 void set_params(unsigned char i) {
     scy[i] = read_mmu(0xFF42);
@@ -21,7 +21,7 @@ void set_params(unsigned char i) {
     wx[i] = read_mmu(0xFF4B);
 }
 
-void draw_color(unsigned char x, unsigned char y, unsigned char color) {
+static void draw_color(unsigned char x, unsigned char y, unsigned char color) {
     switch (color) {
         case 0:
             color = 255;
@@ -39,7 +39,7 @@ void draw_color(unsigned char x, unsigned char y, unsigned char color) {
     gameboy.framebuffer.buffer[x][y] = color;
 }
 
-void draw_sprite(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
+static void draw_sprite(unsigned char offset_x, unsigned char offset_y, unsigned short tile_offset, bool x_flip, bool y_flip) {
     unsigned char palette = read_mmu(0xFF48);
 
     for (unsigned char y = 0; y < 8; y++) {
@@ -63,7 +63,7 @@ void draw_sprite(unsigned char offset_x, unsigned char offset_y, unsigned short 
     }
 }
 
-void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_addr, unsigned char palette,
+static void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short tile_addr, unsigned char palette,
                unsigned char buffer[256][256]) {
 
     for (unsigned char y = 0; y < 8; y++) {
@@ -77,7 +77,7 @@ void draw_tile(unsigned char offset_x, unsigned char offset_y, unsigned short ti
     }
 }
 
-void render_bg() {
+static void render_bg() {
     for (unsigned char y = 0; y < 32; y++) {
         for (unsigned char x = 0; x < 32; x++) {
             draw_tile(x * 8, y * 8, get_tile(x, y, false), read_mmu(0xFF47), background);
@@ -91,7 +91,7 @@ void render_bg() {
     }
 }
 
-void render_window() {
+static void render_window() {
     if (!window_display_enable()) {
         return;
     }
@@ -111,7 +111,7 @@ void render_window() {
     }
 }
 
-void render_sprites() {
+static void render_sprites() {
     for (unsigned char i = 0; i < 0xA0; i += 4) {
         unsigned char y = read_mmu(0xFE00 + i);
         unsigned char x = read_mmu(0xFE00 + i + 1);

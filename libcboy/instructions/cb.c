@@ -219,7 +219,7 @@ static inline unsigned char SET(unsigned char value, unsigned char i) { return v
 
 #define DEFINE_OP_REG(OP, REG) \
         void OP ## _ ## REG() { \
-            gameboy.cpu.REG = OP(gameboy.cpu.REG); \
+            cpu.REG = OP(cpu.REG); \
         }
 
 #define DEFINE_CB_OPS(REG) \
@@ -234,15 +234,15 @@ static inline unsigned char SET(unsigned char value, unsigned char i) { return v
 
 #define DEFINE_BIT_N_REG(N, REG) \
         void BIT_ ## N ## _ ## REG() { \
-            gameboy.cpu.REG = BIT(gameboy.cpu.REG, N); \
+            cpu.REG = BIT(cpu.REG, N); \
         } \
         \
         void RES_ ## N ## _ ## REG() { \
-            gameboy.cpu.REG = RES(gameboy.cpu.REG, N); \
+            cpu.REG = RES(cpu.REG, N); \
         } \
         \
         void SET_ ## N ## _ ## REG() { \
-            gameboy.cpu.REG = SET(gameboy.cpu.REG, N); \
+            cpu.REG = SET(cpu.REG, N); \
         }
 
 #define DEFINE_BIT_REG(REG) \

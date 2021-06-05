@@ -7,8 +7,6 @@
 #include "gameboy.h"
 
 Gameboy gameboy = {.controls = 0xFF,
-                   .cpu.SP = 0xFFFF,
-                   .cpu.ime = true,
                    .mmu.mbc.rom_bank_number = 1,
                    .mmu.mbc.ram_bank_number = 0,
                    .mmu.mbc.rom_ram_select = 0};
@@ -16,8 +14,8 @@ Gameboy gameboy = {.controls = 0xFF,
 void init() {
     memset(gameboy.mmu.ram, 0, 0x8000);
 
-    gameboy.cpu.PC = 0x100;
-    gameboy.cpu.SP = 0xfffe;
+    cpu.PC = 0x100;
+    cpu.SP = 0xfffe;
     set_AF(0x11b0);
     set_BC(0x13);
     set_DE(0xd8);
@@ -103,7 +101,7 @@ void load_state() {
     fread(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
 
     // read cpu state
-    fread(&gameboy.cpu, sizeof(Cpu), 1, file);
+    fread(&cpu, sizeof(Cpu), 1, file);
 
     fclose(file);
 }
@@ -119,7 +117,7 @@ void save_state() {
     fwrite(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
 
     // save cpu state
-    fwrite(&gameboy.cpu, sizeof(Cpu), 1, file);
+    fwrite(&cpu, sizeof(Cpu), 1, file);
 
     fclose(file);
 }

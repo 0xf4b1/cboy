@@ -10,7 +10,7 @@
 unsigned char NOP() { return 4; }
 
 unsigned char HALT() {
-    gameboy.cpu.halt = true;
+    cpu.halt = true;
     return 4;
 }
 
@@ -23,9 +23,9 @@ unsigned char HALT() {
  * nn = AF,BC,DE,HL
  */
 static inline void PUSH(unsigned short value) {
-    write_mmu(gameboy.cpu.SP - 1, value >> 8);
-    write_mmu(gameboy.cpu.SP - 2, value & 0xFF);
-    gameboy.cpu.SP -= 2;
+    write_mmu(cpu.SP - 1, value >> 8);
+    write_mmu(cpu.SP - 2, value & 0xFF);
+    cpu.SP -= 2;
 }
 
 /*
@@ -37,8 +37,8 @@ static inline void PUSH(unsigned short value) {
  * nn = AF,BC,DE,HL
  */
 static inline unsigned short POP() {
-    unsigned short value = (read_mmu(gameboy.cpu.SP + 1) << 8 | read_mmu(gameboy.cpu.SP)) & 0xFFFF;
-    gameboy.cpu.SP += 2;
+    unsigned short value = (read_mmu(cpu.SP + 1) << 8 | read_mmu(cpu.SP)) & 0xFFFF;
+    cpu.SP += 2;
     return value;
 }
 
@@ -50,13 +50,13 @@ static inline unsigned short POP() {
  * nn = two byte immediate value. (LS byte first.)
  */
 unsigned char JP(unsigned short addr) {
-    gameboy.cpu.PC = addr;
+    cpu.PC = addr;
     return 16;
 }
 
 unsigned char JP_NZ_a16(unsigned short value) {
     if (!flag_Z()) {
-        gameboy.cpu.PC = value;
+        cpu.PC = value;
         return 16;
     }
     return 12;
@@ -64,7 +64,7 @@ unsigned char JP_NZ_a16(unsigned short value) {
 
 unsigned char JP_NC_a16(unsigned short value) {
     if (!flag_C()) {
-        gameboy.cpu.PC = value;
+        cpu.PC = value;
         return 16;
     }
     return 12;
@@ -72,7 +72,7 @@ unsigned char JP_NC_a16(unsigned short value) {
 
 unsigned char JP_C_a16(unsigned short value) {
     if (flag_C()) {
-        gameboy.cpu.PC = value;
+        cpu.PC = value;
         return 16;
     }
     return 12;
@@ -80,7 +80,7 @@ unsigned char JP_C_a16(unsigned short value) {
 
 unsigned char JP_Z_a16(unsigned short value) {
     if (flag_Z()) {
-        gameboy.cpu.PC = value;
+        cpu.PC = value;
         return 16;
     }
     return 12;
@@ -92,7 +92,7 @@ unsigned char JP_Z_a16(unsigned short value) {
  * Jump to address contained in HL.
  */
 unsigned char JP_HL() {
-    gameboy.cpu.PC = HL();
+    cpu.PC = HL();
     return 4;
 }
 
@@ -103,7 +103,7 @@ unsigned char JP_HL() {
  * Use with:
  * n = one byte signed immediate value
  */
-static inline void JR(unsigned char value) { gameboy.cpu.PC += (value ^ 0x80) - 0x80; }
+static inline void JR(unsigned char value) { cpu.PC += (value ^ 0x80) - 0x80; }
 
 unsigned char JR_C_r8(unsigned char value) {
     if (flag_C()) {
@@ -151,8 +151,8 @@ unsigned char JR_r8(unsigned char value) {
  * nn = two byte immediate value. (LS byte first.)
  */
 unsigned char CALL_a16(unsigned short addr) {
-    PUSH(gameboy.cpu.PC);
-    gameboy.cpu.PC = addr;
+    PUSH(cpu.PC);
+    cpu.PC = addr;
     return 24;
 }
 
@@ -190,13 +190,13 @@ unsigned char CALL_C_a16(unsigned short addr) {
  * Pop two bytes from stack & jump to that address.
  */
 unsigned char RET() {
-    gameboy.cpu.PC = POP();
+    cpu.PC = POP();
     return 16;
 }
 
 unsigned char RET_C() {
     if (flag_C()) {
-        gameboy.cpu.PC = POP();
+        cpu.PC = POP();
         return 20;
     }
     return 8;
@@ -204,7 +204,7 @@ unsigned char RET_C() {
 
 unsigned char RET_NC() {
     if (!flag_C()) {
-        gameboy.cpu.PC = POP();
+        cpu.PC = POP();
         return 20;
     }
     return 8;
@@ -212,7 +212,7 @@ unsigned char RET_NC() {
 
 unsigned char RET_Z() {
     if (flag_Z()) {
-        gameboy.cpu.PC = POP();
+        cpu.PC = POP();
         return 20;
     }
     return 8;
@@ -220,7 +220,7 @@ unsigned char RET_Z() {
 
 unsigned char RET_NZ() {
     if (!flag_Z()) {
-        gameboy.cpu.PC = POP();
+        cpu.PC = POP();
         return 20;
     }
     return 8;
@@ -233,14 +233,14 @@ unsigned char RET_NZ() {
  * enable interrupts.
  */
 unsigned char RETI() {
-    gameboy.cpu.PC = POP();
-    gameboy.cpu.ime = true;
+    cpu.PC = POP();
+    cpu.ime = true;
     return 16;
 }
 
 static inline unsigned char RST(unsigned char addr) {
-    PUSH(gameboy.cpu.PC);
-    gameboy.cpu.PC = addr;
+    PUSH(cpu.PC);
+    cpu.PC = addr;
     return 16;
 }
 
@@ -298,12 +298,12 @@ static inline unsigned short ADD_HL_n(unsigned short a, unsigned short b) {
  * C - Set or reset according to operation.
  */
 unsigned char ADD_SP_r8(unsigned char value) {
-    unsigned short res = (gameboy.cpu.SP + (char)value) & 0xFFFF;
+    unsigned short res = (cpu.SP + (char)value) & 0xFFFF;
     set_flag_Z(false);
     set_flag_N(false);
-    set_flag_H((gameboy.cpu.SP & 0xF) + (value & 0xF) > 0xF);
-    set_flag_C((gameboy.cpu.SP & 0xFF) + (value & 0xFF) > 0xFF);
-    gameboy.cpu.SP = res;
+    set_flag_H((cpu.SP & 0xF) + (value & 0xF) > 0xF);
+    set_flag_C((cpu.SP & 0xFF) + (value & 0xFF) > 0xFF);
+    cpu.SP = res;
     return 16;
 }
 
@@ -507,8 +507,8 @@ static inline unsigned char CP(unsigned char a, unsigned char b) {
  * C - Contains old bit 7 data.
  */
 unsigned char RLCA() {
-    bool c = gameboy.cpu.A >> 7 & 1;
-    gameboy.cpu.A = (gameboy.cpu.A << 1 | c) & 0xFF;
+    bool c = cpu.A >> 7 & 1;
+    cpu.A = (cpu.A << 1 | c) & 0xFF;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H(false);
@@ -527,8 +527,8 @@ unsigned char RLCA() {
  * C - Contains old bit 0 data.
  */
 unsigned char RRCA() {
-    bool c = gameboy.cpu.A & 1;
-    gameboy.cpu.A = ((gameboy.cpu.A >> 1) | c << 7) & 0xFF;
+    bool c = cpu.A & 1;
+    cpu.A = ((cpu.A >> 1) | c << 7) & 0xFF;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H(false);
@@ -547,8 +547,8 @@ unsigned char RRCA() {
  * C - Contains old bit 7 data.
  */
 unsigned char RLA() {
-    bool c = (gameboy.cpu.A >> 7) & 1;
-    gameboy.cpu.A = ((gameboy.cpu.A << 1) | flag_C()) & 0xFF;
+    bool c = (cpu.A >> 7) & 1;
+    cpu.A = ((cpu.A << 1) | flag_C()) & 0xFF;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H(false);
@@ -567,8 +567,8 @@ unsigned char RLA() {
  * C - Contains old bit 0 data.
  */
 unsigned char RRA() {
-    unsigned char c = gameboy.cpu.A & 1;
-    gameboy.cpu.A = ((gameboy.cpu.A >> 1) | (flag_C() << 7)) & 0xFF;
+    unsigned char c = cpu.A & 1;
+    cpu.A = ((cpu.A >> 1) | (flag_C() << 7)) & 0xFF;
     set_flag_Z(false);
     set_flag_N(false);
     set_flag_H(false);
@@ -590,7 +590,7 @@ unsigned char RRA() {
  * C - Set or reset according to operation.
  */
 unsigned char DAA() {
-    unsigned char t = gameboy.cpu.A;
+    unsigned char t = cpu.A;
     unsigned char corr = 0;
     if (flag_H())
         corr |= 0x06;
@@ -608,7 +608,7 @@ unsigned char DAA() {
     set_flag_Z((t & 0xFF) == 0);
     set_flag_H(false);
     set_flag_C((corr & 0x60) != 0);
-    gameboy.cpu.A = t & 0xFF;
+    cpu.A = t & 0xFF;
     return 4;
 }
 
@@ -623,7 +623,7 @@ unsigned char DAA() {
  * C - Not affected.
  */
 unsigned char CPL() {
-    gameboy.cpu.A = ~gameboy.cpu.A & 0xFF;
+    cpu.A = ~cpu.A & 0xFF;
     set_flag_N(true);
     set_flag_H(true);
     return 4;
@@ -666,22 +666,22 @@ unsigned char CCF() {
 }
 
 unsigned char LD_A_BC() {
-    gameboy.cpu.A = read_mmu(BC());
+    cpu.A = read_mmu(BC());
     return 8;
 }
 
 unsigned char LD_BC_A() {
-    write_mmu(BC(), gameboy.cpu.A);
+    write_mmu(BC(), cpu.A);
     return 8;
 }
 
 unsigned char LD_A_DE() {
-    gameboy.cpu.A = read_mmu(DE());
+    cpu.A = read_mmu(DE());
     return 8;
 }
 
 unsigned char LD_DE_A() {
-    write_mmu(DE(), gameboy.cpu.A);
+    write_mmu(DE(), cpu.A);
     return 8;
 }
 
@@ -692,7 +692,7 @@ unsigned char LD_DE_A() {
  * Same as: LD (HL),A - INC HL
  */
 unsigned char LDI_HL_A() {
-    write_mmu(HL(), gameboy.cpu.A);
+    write_mmu(HL(), cpu.A);
     set_HL((HL() + 1) & 0xFFFF);
     return 8;
 }
@@ -704,7 +704,7 @@ unsigned char LDI_HL_A() {
  * Same as: LD A,(HL) - INC HL
  */
 unsigned char LDI_A_HL() {
-    gameboy.cpu.A = read_mmu(HL());
+    cpu.A = read_mmu(HL());
     set_HL((HL() + 1) & 0xFFFF);
     return 8;
 }
@@ -716,7 +716,7 @@ unsigned char LDI_A_HL() {
  * Same as: LD (HL),A - DEC HL
  */
 unsigned char LDD_HL_A() {
-    write_mmu(HL(), gameboy.cpu.A);
+    write_mmu(HL(), cpu.A);
     set_HL(HL() - 1);
     return 8;
 }
@@ -728,7 +728,7 @@ unsigned char LDD_HL_A() {
  * Same as: LD A,(HL) - DEC HL
  */
 unsigned char LDD_A_HL() {
-    gameboy.cpu.A = read_mmu(HL());
+    cpu.A = read_mmu(HL());
     set_HL((HL() - 1) & 0xFFFF);
     return 8;
 }
@@ -741,7 +741,7 @@ unsigned char LDD_A_HL() {
  * n = one byte immediate value.
  */
 unsigned char LDH_n_A(unsigned char addr) {
-    write_mmu(0xFF00 + addr, gameboy.cpu.A);
+    write_mmu(0xFF00 + addr, cpu.A);
     return 12;
 }
 
@@ -753,7 +753,7 @@ unsigned char LDH_n_A(unsigned char addr) {
  * n = one byte immediate value.
  */
 unsigned char LDH_A_n(unsigned char addr) {
-    gameboy.cpu.A = read_mmu(0xFF00 + addr);
+    cpu.A = read_mmu(0xFF00 + addr);
     return 12;
 }
 
@@ -764,7 +764,7 @@ unsigned char LDH_A_n(unsigned char addr) {
  * Same as: LD A,($FF00+C)
  */
 unsigned char LD_A_Cp() {
-    gameboy.cpu.A = read_mmu(0xFF00 + gameboy.cpu.C);
+    cpu.A = read_mmu(0xFF00 + cpu.C);
     return 4;
 }
 
@@ -774,7 +774,7 @@ unsigned char LD_A_Cp() {
  * Put A into address $FF00 + register C.
  */
 unsigned char LD_Cp_A() {
-    write_mmu(0xFF00 + gameboy.cpu.C, gameboy.cpu.A);
+    write_mmu(0xFF00 + cpu.C, cpu.A);
     return 8;
 }
 
@@ -786,8 +786,8 @@ unsigned char LD_Cp_A() {
  * nn = two byte immediate address.
  */
 unsigned char LD_a16_SP(unsigned short addr) {
-    write_mmu(addr, gameboy.cpu.SP & 0xFF);
-    write_mmu(addr + 1, gameboy.cpu.SP >> 8 & 0xFF);
+    write_mmu(addr, cpu.SP & 0xFF);
+    write_mmu(addr + 1, cpu.SP >> 8 & 0xFF);
     return 20;
 }
 
@@ -799,7 +799,7 @@ unsigned char LD_a16_SP(unsigned short addr) {
  * nn = two byte immediate value. (LS byte first.)
  */
 unsigned char LD_a16_A(unsigned short value) {
-    write_mmu(value, gameboy.cpu.A);
+    write_mmu(value, cpu.A);
     return 16;
 }
 
@@ -811,7 +811,7 @@ unsigned char LD_a16_A(unsigned short value) {
  * nn = two byte immediate value. (LS byte first.)
  */
 unsigned char LD_A_a16(unsigned short value) {
-    gameboy.cpu.A = read_mmu(value);
+    cpu.A = read_mmu(value);
     return 16;
 }
 
@@ -828,11 +828,11 @@ unsigned char LD_A_a16(unsigned short value) {
  * C - Set or reset according to operation.
  */
 unsigned char LD_HL_SP_r8(unsigned char value) {
-    unsigned short res = gameboy.cpu.SP + (char)value;
+    unsigned short res = cpu.SP + (char)value;
     set_flag_Z(false);
     set_flag_N(false);
-    set_flag_H((gameboy.cpu.SP & 0xF) + (value & 0xF) > 0xF);
-    set_flag_C((gameboy.cpu.SP & 0xFF) + (value & 0xFF) > 0xFF);
+    set_flag_H((cpu.SP & 0xF) + (value & 0xF) > 0xF);
+    set_flag_C((cpu.SP & 0xFF) + (value & 0xFF) > 0xFF);
     set_HL(res & 0xFFFF);
     return 12;
 }
@@ -843,7 +843,7 @@ unsigned char LD_HL_SP_r8(unsigned char value) {
  * Put HL into Stack Pointer (SP).
  */
 unsigned char LD_SP_HL() {
-    gameboy.cpu.SP = HL();
+    cpu.SP = HL();
     return 8;
 }
 
@@ -857,7 +857,7 @@ unsigned char LD_SP_HL() {
  * None.
  */
 unsigned char DI() {
-    gameboy.cpu.ime = false;
+    cpu.ime = false;
     return 4;
 }
 
@@ -871,7 +871,7 @@ unsigned char DI() {
  * None.
  */
 unsigned char EI() {
-    gameboy.cpu.ime = true;
+    cpu.ime = true;
     return 4;
 }
 
@@ -958,60 +958,60 @@ DEFINE_STACK(AF)
 // INC r8
 #define DEFINE_INC_r8(REG) \
         unsigned char INC_ ## REG () { \
-            gameboy.cpu.REG = INC(gameboy.cpu.REG); \
+            cpu.REG = INC(cpu.REG); \
             return 8; \
         }
 
 // DEC r8
 #define DEFINE_DEC_r8(REG) \
         unsigned char DEC_ ## REG () { \
-            gameboy.cpu.REG = DEC(gameboy.cpu.REG); \
+            cpu.REG = DEC(cpu.REG); \
             return 8; \
         }
 
 // LD r8,d8
 #define DEFINE_LD_r8_d8(REG) \
         unsigned char LD_ ## REG ## _d8(unsigned char arg) { \
-            gameboy.cpu.REG = arg; \
+            cpu.REG = arg; \
             return 8; \
         }
 
 // LD r8,r8
 #define DEFINE_LD_r8_r8(REG1, REG2) \
         unsigned char LD_ ## REG1 ## _ ## REG2 () { \
-            gameboy.cpu.REG1 = gameboy.cpu.REG2; \
+            cpu.REG1 = cpu.REG2; \
             return 4; \
         }
 
 // LD r8,(HL)
 #define DEFINE_LD_r8_HLp(REG) \
         unsigned char LD_ ## REG ## _HLp () { \
-            gameboy.cpu.REG = read_mmu(HL()); \
+            cpu.REG = read_mmu(HL()); \
             return 8; \
         }
 
 // LD (HL),r8
 #define DEFINE_LD_HLp_r8(REG) \
         unsigned char LD_HLp_ ## REG () { \
-            write_mmu(HL(), gameboy.cpu.REG); \
+            write_mmu(HL(), cpu.REG); \
             return 8; \
         }
 
 #define DEFINE_OP_r8(OP, REG) \
         unsigned char OP ## _ ## REG () { \
-            gameboy.cpu.A = OP(gameboy.cpu.A, gameboy.cpu.REG); \
+            cpu.A = OP(cpu.A, cpu.REG); \
             return 4; \
         }
 
 #define DEFINE_OP_d8(OP) \
         unsigned char OP ## _d8 (unsigned char arg) { \
-            gameboy.cpu.A = OP(gameboy.cpu.A, arg); \
+            cpu.A = OP(cpu.A, arg); \
             return 8; \
         }
 
 #define DEFINE_OP_HLp(OP) \
         unsigned char OP ## _HLp () { \
-            gameboy.cpu.A = OP(gameboy.cpu.A, read_mmu(HL())); \
+            cpu.A = OP(cpu.A, read_mmu(HL())); \
             return 8; \
         }
 

@@ -6,6 +6,9 @@
 #include "instructions/cb.h"
 #include "instructions/instructions.h"
 
+Cpu cpu =  {.SP = 0xFFFF,
+            .ime = true};
+
 static const unsigned char (*opcodes[0x100])() = {NOP, LD_BC_d16, LD_BC_A, INC_BC, INC_B, DEC_B, LD_B_d8, RLCA, LD_a16_SP, ADD_HL_BC, LD_A_BC, DEC_BC, INC_C, DEC_C, LD_C_d8, RRCA,
         NOP, LD_DE_d16, LD_DE_A, INC_DE, INC_D, DEC_D, LD_D_d8, RLA, JR_r8, ADD_HL_DE, LD_A_DE, DEC_DE, INC_E, DEC_E, LD_E_d8, RRA,
         JR_NZ_r8, LD_HL_d16, LDI_HL_A, INC_HL, INC_H, DEC_H, LD_H_d8, DAA, JR_Z_r8, ADD_HL_HL, LDI_A_HL, DEC_HL, INC_L, DEC_L, LD_L_d8, CPL,
@@ -58,8 +61,8 @@ static const unsigned char lengths[0x100] = {1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1,
                                             2, 1, 1, 1, -1, 1, 2, 1, 2, 1, 3, 1, -1, -1, 2, 1};
 
 static unsigned char fetch() {
-    unsigned char value = read_mmu(gameboy.cpu.PC);
-    gameboy.cpu.PC += 1;
+    unsigned char value = read_mmu(cpu.PC);
+    cpu.PC += 1;
     return value;
 }
 
@@ -87,26 +90,26 @@ static void check_interrupt() {
         // check for interrupt enable and interrupt request being set
         if (interrupt_enable >> i & 1 && interrupt_flag >> i & 1) {
 
-            if (gameboy.cpu.halt)
-                gameboy.cpu.halt = false;
+            if (cpu.halt)
+                cpu.halt = false;
 
-            if (!gameboy.cpu.ime)
+            if (!cpu.ime)
                 return;
 
             // reset corresponding bit
             write_mmu(0xFF0F, read_mmu(0xFF0F) & ~(1 << i));
 
             // disable IME
-            gameboy.cpu.ime = false;
+            cpu.ime = false;
 
             // push PC to stack
-            write_mmu(gameboy.cpu.SP - 1, gameboy.cpu.PC >> 8);
-            write_mmu(gameboy.cpu.SP - 2, gameboy.cpu.PC & 0xFF);
-            gameboy.cpu.SP -= 2;
+            write_mmu(cpu.SP - 1, cpu.PC >> 8);
+            write_mmu(cpu.SP - 2, cpu.PC & 0xFF);
+            cpu.SP -= 2;
 
             // call corresponding interrupt address
-            gameboy.cpu.PC = 0x40 + i * 8;
-            gameboy.cpu.halt = false;
+            cpu.PC = 0x40 + i * 8;
+            cpu.halt = false;
         }
     }
 }
@@ -115,7 +118,7 @@ static unsigned char next_instruction() {
 
     check_interrupt();
 
-    if (gameboy.cpu.halt)
+    if (cpu.halt)
         return 12;
 
     unsigned char opcode = fetch();
@@ -193,61 +196,3 @@ Frame next_frame() {
 
     return gameboy.framebuffer;
 }
-
-unsigned short AF() { return (gameboy.cpu.A << 8) + gameboy.cpu.F; }
-
-void set_AF(unsigned short value) {
-    gameboy.cpu.A = value >> 8 & 0xFF;
-    gameboy.cpu.F = value & 0xF0;
-}
-
-unsigned short BC() { return (gameboy.cpu.B << 8) + gameboy.cpu.C; }
-
-void set_BC(unsigned short value) {
-    gameboy.cpu.B = value >> 8 & 0xFF;
-    gameboy.cpu.C = value & 0xFF;
-}
-
-unsigned short DE() { return (gameboy.cpu.D << 8) + gameboy.cpu.E; }
-
-void set_DE(unsigned short value) {
-    gameboy.cpu.D = value >> 8 & 0xFF;
-    gameboy.cpu.E = value & 0xFF;
-}
-
-unsigned short HL() { return (gameboy.cpu.H << 8) + gameboy.cpu.L; }
-
-void set_HL(unsigned short value) {
-    gameboy.cpu.H = value >> 8 & 0xFF;
-    gameboy.cpu.L = value & 0xFF;
-}
-
-unsigned short SP() { return gameboy.cpu.SP; }
-
-void set_SP(unsigned short value) { gameboy.cpu.SP = value; }
-
-bool get_bit(unsigned char i) { return gameboy.cpu.F >> i & 1; }
-
-void set_bit(unsigned char i, bool set) {
-    if (set) {
-        gameboy.cpu.F |= 1 << i;
-    } else {
-        gameboy.cpu.F &= ~(1 << i);
-    }
-}
-
-bool flag_Z() { return get_bit(7); }
-
-void set_flag_Z(bool set) { set_bit(7, set); }
-
-bool flag_N() { return get_bit(6); }
-
-void set_flag_N(bool set) { set_bit(6, set); }
-
-bool flag_H() { return get_bit(5); }
-
-void set_flag_H(bool set) { set_bit(5, set); }
-
-bool flag_C() { return get_bit(4); }
-
-void set_flag_C(bool set) { set_bit(4, set); }

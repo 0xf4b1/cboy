@@ -12,7 +12,6 @@ extern "C" {
 #include "mmu.h"
 
 typedef struct {
-    Cpu cpu;
     Mmu mmu;
     unsigned char controls;
     Frame framebuffer;
