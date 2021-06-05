@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "gameboy.h"
@@ -9,8 +7,6 @@
 unsigned char read_mmu(unsigned short addr) {
     if (addr < 0x8000) {
         return read_mbc(addr);
-    } else if (addr == 0xFF04) {
-        return rand() % 0x100;
     }
 
     return gameboy.mmu.ram[addr - 0x8000];
