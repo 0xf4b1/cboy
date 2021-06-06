@@ -8,13 +8,13 @@ extern "C" {
 #endif
 
 #include "cpu.h"
-#include "display.h"
 #include "mmu.h"
 
 typedef struct {
     Mmu mmu;
     unsigned char controls;
     Frame framebuffer;
+    bool cgb;
 } Gameboy;
 
 extern Gameboy gameboy;

@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    unsigned char buffer[144][160];
+    unsigned short buffer[144][160];
 } Frame;
 
 void draw();

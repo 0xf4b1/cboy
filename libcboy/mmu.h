@@ -9,6 +9,10 @@
 
 typedef struct {
     unsigned char ram[0x8000];
+    unsigned char vram_bank[0x2000];
+    unsigned char wram[7][0x1000];
+    unsigned char bg_palette[0x1000];
+    unsigned char sprite_palette[0x1000];
     Mbc mbc;
 } Mmu;
 

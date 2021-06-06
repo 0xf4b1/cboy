@@ -6,10 +6,12 @@
 typedef struct {
     char *filename;
     unsigned char *rom;
+    unsigned char ram[4][0x2000];
 
     unsigned char rom_bank_number;
     unsigned char ram_bank_number;
-    unsigned char rom_ram_select;
+    bool rom_ram_select;
+    bool ram_enable;
 } Mbc;
 
 unsigned char read_mbc(unsigned short addr);

@@ -13,6 +13,9 @@ Gameboy gameboy = {.controls = 0xFF,
 
 void init() {
     memset(gameboy.mmu.ram, 0, 0x8000);
+    memset(gameboy.mmu.bg_palette, 0, 0x1000);
+    memset(gameboy.mmu.sprite_palette, 0, 0x1000);
+    memset(gameboy.mmu.vram_bank, 0, 0x2000);
 
     cpu.PC = 0x100;
     cpu.SP = 0xfffe;
@@ -82,11 +85,13 @@ void load_rom(char *path) {
     fread(gameboy.mmu.mbc.rom, fileLen, 1, file);
     fclose(file);
 
+    gameboy.cgb = gameboy.mmu.mbc.rom[0x143] == 0x80 || gameboy.mmu.mbc.rom[0x143] == 0xC0;
+
     init();
 }
 
 void load_state() {
-    char filename[strlen(gameboy.mmu.mbc.filename) + 4];
+    char filename[strlen(gameboy.mmu.mbc.filename) + 5];
     stpcpy(filename, gameboy.mmu.mbc.filename);
     strcat(filename, ".sav");
 
@@ -97,24 +102,30 @@ void load_state() {
         return;
     }
 
+    void *ptr_filename = gameboy.mmu.mbc.filename;
+    void *ptr_rom = gameboy.mmu.mbc.rom;
+
     // read ram state
-    fread(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
+    fread(&gameboy.mmu, sizeof(Mmu), 1, file);
 
     // read cpu state
     fread(&cpu, sizeof(Cpu), 1, file);
+
+    gameboy.mmu.mbc.filename = ptr_filename;
+    gameboy.mmu.mbc.rom = ptr_rom;
 
     fclose(file);
 }
 
 void save_state() {
-    char filename[strlen(gameboy.mmu.mbc.filename) + 4];
+    char filename[strlen(gameboy.mmu.mbc.filename) + 5];
     stpcpy(filename, gameboy.mmu.mbc.filename);
     strcat(filename, ".sav");
 
     FILE *file = fopen(filename, "wb");
 
     // save ram state
-    fwrite(gameboy.mmu.ram, sizeof(char), sizeof(gameboy.mmu.ram), file);
+    fwrite(&gameboy.mmu, sizeof(Mmu), 1, file);
 
     // save cpu state
     fwrite(&cpu, sizeof(Cpu), 1, file);

@@ -21,17 +21,17 @@ uint8_t *fbp;
 unsigned char scale = 1;
 int x_offset = 0;
 
-void draw_pixel_rgb(uint32_t x, uint32_t y, uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
+static void draw_pixel_rgb(uint32_t x, uint32_t y, uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
     uint32_t pixel =
         (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset) | (a << vinfo.transp.offset);
     uint32_t location = x * vinfo.bits_per_pixel / 8 + y * finfo.line_length;
     *((uint32_t *)(fbp + location)) = pixel;
 }
 
-void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
+static void draw_pixel(unsigned char x, unsigned char y, unsigned short color) {
     for (unsigned char px = 0; px < scale; px++) {
         for (unsigned char py = 0; py < scale; py++) {
-            draw_pixel_rgb(x * scale + px + x_offset, y * scale + py, color, color, color, 0);
+            draw_pixel_rgb(x * scale + px + x_offset, y * scale + py, (color & 0x1f) * 8, ((color >> 5) & 0x1f) * 8, ((color >> 10) & 0x1f) * 8, 0);
         }
     }
 }

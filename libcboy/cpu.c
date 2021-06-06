@@ -7,7 +7,8 @@
 #include "instructions/instructions.h"
 
 Cpu cpu =  {.SP = 0xFFFF,
-            .ime = true};
+            .ime = true,
+            .halt = false};
 
 static const unsigned char (*opcodes[0x100])() = {NOP, LD_BC_d16, LD_BC_A, INC_BC, INC_B, DEC_B, LD_B_d8, RLCA, LD_a16_SP, ADD_HL_BC, LD_A_BC, DEC_BC, INC_C, DEC_C, LD_C_d8, RRCA,
         NOP, LD_DE_d16, LD_DE_A, INC_DE, INC_D, DEC_D, LD_D_d8, RLA, JR_r8, ADD_HL_DE, LD_A_DE, DEC_DE, INC_E, DEC_E, LD_E_d8, RRA,
