@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
                 for (unsigned char py = 0; py < SCALE; py++) {
                     for (unsigned char px = 0; px < SCALE; px++) {
-                        framebuffer[pos * SCALE + py * stride / sizeof(u32) + px] = RGBA8_MAXALPHA(color, color, color);
+                        framebuffer[pos * SCALE + py * stride / sizeof(u32) + px] = RGBA8_MAXALPHA((color & 0x1f) * 8, ((color >> 5) & 0x1f) * 8, ((color >> 10) & 0x1f) * 8);
                     }
                 }
             }
