@@ -23,7 +23,7 @@ bool fullscreen = false;
 Frame buffer;
 
 
-void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
+static void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
     glPointSize(window_width / (float)WIDTH);
     glBegin(GL_POINTS);
     glColor3f((float)color / 255, (float)color / 255, (float)color / 255);
@@ -31,7 +31,7 @@ void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
     glEnd();
 }
 
-void display() {
+static void display() {
     window_width = glutGet(GLUT_WINDOW_WIDTH);
     window_height = glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -49,7 +49,7 @@ void display() {
     glutSwapBuffers();
 }
 
-void idle_func() {
+static void idle_func() {
     buffer = next_frame();
     glutPostRedisplay();
 }

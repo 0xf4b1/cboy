@@ -11,7 +11,7 @@
 
 int js_dev = -1;
 
-int read_event(int fd, struct js_event *event) {
+static int read_event(int fd, struct js_event *event) {
     ssize_t bytes;
 
     bytes = read(fd, event, sizeof(*event));

@@ -10,7 +10,7 @@
 #include <display.h>
 #include <gameboy.h>
 
-void handle_key(int key, void (*function)(unsigned char)) {
+static void handle_key(int key, void (*function)(unsigned char)) {
     switch (key) {
         case GLUT_KEY_RIGHT:
             function(RIGHT);
