@@ -104,17 +104,17 @@ int engine_init_display(struct engine *engine) {
     return 0;
 }
 
-void draw_color(unsigned char x, unsigned char y, float color) {
-    colors[(y * 4 * WIDTH) + 4 * x] = color;
-    colors[(y * 4 * WIDTH) + 4 * x + 1] = color;
-    colors[(y * 4 * WIDTH) + 4 * x + 2] = color;
+void draw_color(unsigned char x, unsigned char y, short color) {
+    colors[(y * 4 * WIDTH) + 4 * x] = (float)(color & 0x1f) / 32;
+    colors[(y * 4 * WIDTH) + 4 * x + 1] = (float)((color >> 5) & 0x1f) / 32;
+    colors[(y * 4 * WIDTH) + 4 * x + 2] = (float)((color >> 10) & 0x1f) / 32;
     colors[(y * 4 * WIDTH) + 4 * x + 3] = 1;
 }
 
 /**
  * Just the current frame in the display.
  */
-void engine_draw_frame(struct engine *engine, unsigned char buffer[HEIGHT][WIDTH]) {
+void engine_draw_frame(struct engine *engine, unsigned short buffer[HEIGHT][WIDTH]) {
 
     if (engine->display == NULL) {
         // No display.
@@ -128,16 +128,13 @@ void engine_draw_frame(struct engine *engine, unsigned char buffer[HEIGHT][WIDTH
 
     for (unsigned char y = 0; y < HEIGHT; y++) {
         for (unsigned char x = 0; x < WIDTH; x++) {
-
-            unsigned char color = buffer[y][x];
-            draw_color(x, y, (float)color / 255);
+            draw_color(x, y, buffer[y][x]);
         }
     }
 
     glVertexPointer(2, GL_SHORT, 0, points);
     glColorPointer(4, GL_FLOAT, 0, colors);
     glClear(GL_COLOR_BUFFER_BIT);
-
     glDrawArrays(GL_POINTS, 0, WIDTH * HEIGHT);
 
     eglSwapBuffers(engine->display, engine->surface);

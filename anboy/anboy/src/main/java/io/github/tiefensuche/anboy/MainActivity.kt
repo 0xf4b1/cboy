@@ -31,7 +31,7 @@ class MainActivity : ListActivity() {
         val values = ArrayList<String>()
         val dir = File(path)
         if (dir.canRead()) {
-            dir.listFiles { file -> file.isDirectory || file.name.endsWith(".gb") }.forEach { file -> values.add(file.name) }
+            dir.listFiles { file -> file.isDirectory || file.name.endsWith(".gb") || file.name.endsWith(".gbc") }.forEach { file -> values.add(file.name) }
         }
 
         listAdapter = ArrayAdapter(this,

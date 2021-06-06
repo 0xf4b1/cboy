@@ -21,7 +21,7 @@ int32_t get_display_height();
 
 int engine_init_display(struct engine *engine);
 
-void engine_draw_frame(struct engine *engine, unsigned char buffer[HEIGHT][WIDTH]);
+void engine_draw_frame(struct engine *engine, unsigned short buffer[HEIGHT][WIDTH]);
 
 void engine_term_display(struct engine *engine);
 
