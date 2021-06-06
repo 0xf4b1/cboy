@@ -23,10 +23,10 @@ bool fullscreen = false;
 Frame buffer;
 
 
-static void draw_pixel(unsigned char x, unsigned char y, unsigned char color) {
+static void draw_pixel(unsigned char x, unsigned char y, unsigned short color) {
     glPointSize(window_width / (float)WIDTH);
     glBegin(GL_POINTS);
-    glColor3f((float)color / 255, (float)color / 255, (float)color / 255);
+    glColor3f((float)(color & 0x1f) / 32, (float)((color >> 5) & 0x1f) / 32, (float)((color >> 10) & 0x1f) / 32);
     glVertex2i(x, y);
     glEnd();
 }
