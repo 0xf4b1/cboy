@@ -1,4 +1,4 @@
-set(cboy_SOURCE_FILES main.c)
+set(cboy_SOURCE_FILES main.cc)
 
 if(NOT RENDERER)
     set(RENDERER OPENGL)
@@ -10,7 +10,7 @@ if(${RENDERER} STREQUAL OPENGL)
     find_package(OpenGL REQUIRED)
     find_package(GLUT REQUIRED)
 
-    list(APPEND cboy_SOURCE_FILES opengl.c keyboard.c)
+    list(APPEND cboy_SOURCE_FILES opengl.cc keyboard.cc)
     set(RENDERER_INCLUDES ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
     set(RENDERER_LIBS ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 

@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 4.3.0)
+
+set (CMAKE_CXX_STANDARD 11)
 
 project(cboy)
 
@@ -8,8 +10,10 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-O1 -g -fsanitize=address")
-set(CMAKE_C_FLAGS_RELEASE "-Ofast -DNDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-O1 -framework OpenGL -framework GLUT -arch arm64")
+set(CMAKE_C_FLAGS_RELEASE "-Ofast -DNDEBUG -framework OpenGL -framework GLUT -arch arm64")
+set(CMAKE_CXX_FLAGS_DEBUG "-O1 -framework OpenGL -framework GLUT -arch arm64")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -DNDEBUG -framework OpenGL -framework GLUT -arch arm64")
 
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 

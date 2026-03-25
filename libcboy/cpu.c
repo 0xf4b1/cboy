@@ -2,6 +2,7 @@
 
 #include "display.h"
 #include "gameboy.h"
+#include "mmu.h"
 #include "timer.h"
 #include "instructions/cb.h"
 #include "instructions/instructions.h"
@@ -10,24 +11,24 @@ Cpu cpu =  {.SP = 0xFFFF,
             .ime = true,
             .halt = false};
 
-static const unsigned char (*opcodes[0x100])() = {NOP, LD_BC_d16, LD_BC_A, INC_BC, INC_B, DEC_B, LD_B_d8, RLCA, LD_a16_SP, ADD_HL_BC, LD_A_BC, DEC_BC, INC_C, DEC_C, LD_C_d8, RRCA,
-        NOP, LD_DE_d16, LD_DE_A, INC_DE, INC_D, DEC_D, LD_D_d8, RLA, JR_r8, ADD_HL_DE, LD_A_DE, DEC_DE, INC_E, DEC_E, LD_E_d8, RRA,
-        JR_NZ_r8, LD_HL_d16, LDI_HL_A, INC_HL, INC_H, DEC_H, LD_H_d8, DAA, JR_Z_r8, ADD_HL_HL, LDI_A_HL, DEC_HL, INC_L, DEC_L, LD_L_d8, CPL,
-        JR_NC_r8, LD_SP_d16, LDD_HL_A, INC_SP, INC_HLp, DEC_HLp, LD_HLp_d8, SCF, JR_C_r8, ADD_HL_SP, LDD_A_HL, DEC_SP, INC_A, DEC_A, LD_A_d8, CCF,
-        LD_B_B, LD_B_C, LD_B_D, LD_B_E, LD_B_H, LD_B_L, LD_B_HLp, LD_B_A, LD_C_B, LD_C_C, LD_C_D, LD_C_E, LD_C_H, LD_C_L, LD_C_HLp, LD_C_A,
-        LD_D_B, LD_D_C, LD_D_D, LD_D_E, LD_D_H, LD_D_L, LD_D_HLp, LD_D_A, LD_E_B, LD_E_C, LD_E_D, LD_E_E, LD_E_H, LD_E_L, LD_E_HLp, LD_E_A,
-        LD_H_B, LD_H_C, LD_H_D, LD_H_E, LD_H_H, LD_H_L, LD_H_HLp, LD_H_A, LD_L_B, LD_L_C, LD_L_D, LD_L_E, LD_L_H, LD_L_L, LD_L_HLp, LD_L_A,
-        LD_HLp_B, LD_HLp_C, LD_HLp_D, LD_HLp_E, LD_HLp_H, LD_HLp_L, HALT, LD_HLp_A, LD_A_B, LD_A_C, LD_A_D, LD_A_E, LD_A_H, LD_A_L, LD_A_HLp, LD_A_A,
-        ADD_B, ADD_C, ADD_D, ADD_E, ADD_H, ADD_L, ADD_HLp, ADD_A, ADC_B, ADC_C, ADC_D, ADC_E, ADC_H, ADC_L, ADC_HLp, ADC_A,
-        SUB_B, SUB_C, SUB_D, SUB_E, SUB_H, SUB_L, SUB_HLp, SUB_A, SBC_B, SBC_C, SBC_D, SBC_E, SBC_H, SBC_L, SBC_HLp, SBC_A,
-        AND_B, AND_C, AND_D, AND_E, AND_H, AND_L, AND_HLp, AND_A, XOR_B, XOR_C, XOR_D, XOR_E, XOR_H, XOR_L, XOR_HLp, XOR_A,
-        OR_B, OR_C, OR_D, OR_E, OR_H, OR_L, OR_HLp, OR_A, CP_B, CP_C, CP_D, CP_E, CP_H, CP_L, CP_HLp, CP_A,
-        RET_NZ, POP_BC, JP_NZ_a16, JP, CALL_NZ_a16, PUSH_BC, ADD_d8, RST_0x0, RET_Z, RET, JP_Z_a16, NOP, CALL_Z_a16, CALL_a16, ADC_d8, RST_0x8,
-        RET_NC, POP_DE, JP_NC_a16, NOP, CALL_NC_a16, PUSH_DE, SUB_d8, RST_0x10, RET_C, RETI, JP_C_a16, NOP, CALL_C_a16, NOP, SBC_d8, RST_0x18,
-        LDH_n_A, POP_HL, LD_Cp_A, NOP, NOP, PUSH_HL, AND_d8, RST_0x20, ADD_SP_r8, JP_HL, LD_a16_A, NOP, NOP, NOP, XOR_d8, RST_0x28,
-        LDH_A_n, POP_AF, LD_A_Cp, DI, NOP, PUSH_AF, OR_d8, RST_0x30, LD_HL_SP_r8, LD_SP_HL, LD_A_a16, EI, NOP, NOP, CP_d8, RST_0x38};
+static unsigned char (*opcodes[0x100])() = {(void*) NOP, (void*) LD_BC_d16, (void*) LD_BC_A, (void*) INC_BC, (void*) INC_B, (void*) DEC_B, (void*) LD_B_d8, (void*) RLCA, (void*) LD_a16_SP, (void*) ADD_HL_BC, (void*) LD_A_BC, (void*) DEC_BC, (void*) INC_C, (void*) DEC_C, (void*) LD_C_d8, (void*) RRCA, (void*)
+        NOP, (void*) LD_DE_d16, (void*) LD_DE_A, (void*) INC_DE, (void*) INC_D, (void*) DEC_D, (void*) LD_D_d8, (void*) RLA, (void*) JR_r8, (void*) ADD_HL_DE, (void*) LD_A_DE, (void*) DEC_DE, (void*) INC_E, (void*) DEC_E, (void*) LD_E_d8, (void*) RRA, (void*)
+        JR_NZ_r8, (void*) LD_HL_d16, (void*) LDI_HL_A, (void*) INC_HL, (void*) INC_H, (void*) DEC_H, (void*) LD_H_d8, (void*) DAA, (void*) JR_Z_r8, (void*) ADD_HL_HL, (void*) LDI_A_HL, (void*) DEC_HL, (void*) INC_L, (void*) DEC_L, (void*) LD_L_d8, (void*) CPL, (void*)
+        JR_NC_r8, (void*) LD_SP_d16, (void*) LDD_HL_A, (void*) INC_SP, (void*) INC_HLp, (void*) DEC_HLp, (void*) LD_HLp_d8, (void*) SCF, (void*) JR_C_r8, (void*) ADD_HL_SP, (void*) LDD_A_HL, (void*) DEC_SP, (void*) INC_A, (void*) DEC_A, (void*) LD_A_d8, (void*) CCF, (void*)
+        LD_B_B, (void*) LD_B_C, (void*) LD_B_D, (void*) LD_B_E, (void*) LD_B_H, (void*) LD_B_L, (void*) LD_B_HLp, (void*) LD_B_A, (void*) LD_C_B, (void*) LD_C_C, (void*) LD_C_D, (void*) LD_C_E, (void*) LD_C_H, (void*) LD_C_L, (void*) LD_C_HLp, (void*) LD_C_A, (void*)
+        LD_D_B, (void*) LD_D_C, (void*) LD_D_D, (void*) LD_D_E, (void*) LD_D_H, (void*) LD_D_L, (void*) LD_D_HLp, (void*) LD_D_A, (void*) LD_E_B, (void*) LD_E_C, (void*) LD_E_D, (void*) LD_E_E, (void*) LD_E_H, (void*) LD_E_L, (void*) LD_E_HLp, (void*) LD_E_A, (void*)
+        LD_H_B, (void*) LD_H_C, (void*) LD_H_D, (void*) LD_H_E, (void*) LD_H_H, (void*) LD_H_L, (void*) LD_H_HLp, (void*) LD_H_A, (void*) LD_L_B, (void*) LD_L_C, (void*) LD_L_D, (void*) LD_L_E, (void*) LD_L_H, (void*) LD_L_L, (void*) LD_L_HLp, (void*) LD_L_A, (void*)
+        LD_HLp_B, (void*) LD_HLp_C, (void*) LD_HLp_D, (void*) LD_HLp_E, (void*) LD_HLp_H, (void*) LD_HLp_L, (void*) HALT, (void*) LD_HLp_A, (void*) LD_A_B, (void*) LD_A_C, (void*) LD_A_D, (void*) LD_A_E, (void*) LD_A_H, (void*) LD_A_L, (void*) LD_A_HLp, (void*) LD_A_A, (void*)
+        ADD_B, (void*) ADD_C, (void*) ADD_D, (void*) ADD_E, (void*) ADD_H, (void*) ADD_L, (void*) ADD_HLp, (void*) ADD_A, (void*) ADC_B, (void*) ADC_C, (void*) ADC_D, (void*) ADC_E, (void*) ADC_H, (void*) ADC_L, (void*) ADC_HLp, (void*) ADC_A, (void*)
+        SUB_B, (void*) SUB_C, (void*) SUB_D, (void*) SUB_E, (void*) SUB_H, (void*) SUB_L, (void*) SUB_HLp, (void*) SUB_A, (void*) SBC_B, (void*) SBC_C, (void*) SBC_D, (void*) SBC_E, (void*) SBC_H, (void*) SBC_L, (void*) SBC_HLp, (void*) SBC_A, (void*)
+        AND_B, (void*) AND_C, (void*) AND_D, (void*) AND_E, (void*) AND_H, (void*) AND_L, (void*) AND_HLp, (void*) AND_A, (void*) XOR_B, (void*) XOR_C, (void*) XOR_D, (void*) XOR_E, (void*) XOR_H, (void*) XOR_L, (void*) XOR_HLp, (void*) XOR_A, (void*)
+        OR_B, (void*) OR_C, (void*) OR_D, (void*) OR_E, (void*) OR_H, (void*) OR_L, (void*) OR_HLp, (void*) OR_A, (void*) CP_B, (void*) CP_C, (void*) CP_D, (void*) CP_E, (void*) CP_H, (void*) CP_L, (void*) CP_HLp, (void*) CP_A, (void*)
+        RET_NZ, (void*) POP_BC, (void*) JP_NZ_a16, (void*) JP, (void*) CALL_NZ_a16, (void*) PUSH_BC, (void*) ADD_d8, (void*) RST_0x0, (void*) RET_Z, (void*) RET, (void*) JP_Z_a16, (void*) NOP, (void*) CALL_Z_a16, (void*) CALL_a16, (void*) ADC_d8, (void*) RST_0x8, (void*)
+        RET_NC, (void*) POP_DE, (void*) JP_NC_a16, (void*) NOP, (void*) CALL_NC_a16, (void*) PUSH_DE, (void*) SUB_d8, (void*) RST_0x10, (void*) RET_C, (void*) RETI, (void*) JP_C_a16, (void*) NOP, (void*) CALL_C_a16, (void*) NOP, (void*) SBC_d8, (void*) RST_0x18, (void*)
+        LDH_n_A, (void*) POP_HL, (void*) LD_Cp_A, (void*) NOP, (void*) NOP, (void*) PUSH_HL, (void*) AND_d8, (void*) RST_0x20, (void*) ADD_SP_r8, (void*) JP_HL, (void*) LD_a16_A, (void*) NOP, (void*) NOP, (void*) NOP, (void*) XOR_d8, (void*) RST_0x28, (void*)
+        LDH_A_n, (void*) POP_AF, (void*) LD_A_Cp, (void*) DI, (void*) NOP, (void*) PUSH_AF, (void*) OR_d8, (void*) RST_0x30, (void*) LD_HL_SP_r8, (void*) LD_SP_HL, (void*) LD_A_a16, (void*) EI, (void*) NOP, (void*) NOP, (void*) CP_d8, (void*) RST_0x38};
 
-static const void (*cb[0x100])() = {RLC_B, RLC_C, RLC_D, RLC_E, RLC_H, RLC_L, RLC_HL, RLC_A, RRC_B, RRC_C, RRC_D, RRC_E, RRC_H, RRC_L, RRC_HL, RRC_A,
+static void (*cb[0x100])() = {RLC_B, RLC_C, RLC_D, RLC_E, RLC_H, RLC_L, RLC_HL, RLC_A, RRC_B, RRC_C, RRC_D, RRC_E, RRC_H, RRC_L, RRC_HL, RRC_A,
         RL_B, RL_C, RL_D, RL_E, RL_H, RL_L, RL_HL, RL_A, RR_B, RR_C, RR_D, RR_E, RR_H, RR_L, RR_HL, RR_A,
         SLA_B, SLA_C, SLA_D, SLA_E, SLA_H, SLA_L, SLA_HL, SLA_A, SRA_B, SRA_C, SRA_D, SRA_E, SRA_H, SRA_L, SRA_HL, SRA_A,
         SWAP_B, SWAP_C, SWAP_D, SWAP_E, SWAP_H, SWAP_L, SWAP_HL, SWAP_A, SRL_B, SRL_C, SRL_D, SRL_E, SRL_H, SRL_L, SRL_HL, SRL_A,

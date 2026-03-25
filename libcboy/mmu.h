@@ -59,7 +59,7 @@ inline bool coincidence_interrupt() { return read_mmu(0xFF41) >> 6 & 1; }
  * to the LCD Driver. The LY can take on any value between 0 through 153. The values between 144 and 153
  * indicate the V-Blank period. Writing will reset the counter.
  */
-inline void set_ly(unsigned char y) {
+static void set_ly(unsigned char y) {
     write_mmu(0xFF44, y);
 
     if (lyc() == y) {
