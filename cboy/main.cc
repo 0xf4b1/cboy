@@ -9,8 +9,9 @@
 #include <GL/glut.h>
 #endif
 
-#include "gameboy.h"
-#include "renderer.h"
+#include "gameboy.hpp"
+#include "renderer_opengl.hpp"
+#include "app_context.hpp"
 
 #ifdef linux
 #include "joystick.h"
@@ -22,15 +23,17 @@ using namespace std;
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         cout << "No rom file specified";
-        //puts("No rom file specified");
         exit(1);
     }
 
 #ifdef linux
     init_joystick();
 #endif
-    load_rom(argv[1]);
-    display_loop();
+    cout << "Loading rom ..." << endl;
+    cboy::Gameboy gameboy;
+    gameboy.load_rom(argv[1]);
+    cboy::renderer::OpenGLRenderer renderer;
+    cboy::display_loop(gameboy, renderer);
 }
 
 void serial_print(char c) {

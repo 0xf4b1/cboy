@@ -6,58 +6,78 @@
 #include <GL/glut.h>
 #endif
 
-#include <controls.h>
-#include <display.h>
-#include <gameboy.h>
+#include <controls.hpp>
+#include "app_context.hpp"
+#include <gameboy.hpp>
 
-static void handle_key(int key, void (*function)(unsigned char)) {
+void normal_key_handler(unsigned char key, int /*x*/, int /*y*/) {
+    auto* gameboy = cboy::get_app_gameboy();
+    if (!gameboy) return;
+    auto& controls = gameboy->controls();
     switch (key) {
         case GLUT_KEY_RIGHT:
-            function(RIGHT);
+            controls.press(cboy::Button::RIGHT);
             break;
         case GLUT_KEY_LEFT:
-            function(LEFT);
+            controls.press(cboy::Button::LEFT);
             break;
         case GLUT_KEY_UP:
-            function(UP);
+            controls.press(cboy::Button::UP);
             break;
         case GLUT_KEY_DOWN:
-            function(DOWN);
+            controls.press(cboy::Button::DOWN);
             break;
         case 'a':
-            function(CBOY_KEY_A);
+            controls.press(cboy::Button::A);
             break;
         case 's':
-            function(CBOY_KEY_B);
+            controls.press(cboy::Button::B);
             break;
         case 'q':
-            function(START);
+            controls.press(cboy::Button::START);
             break;
         case 'w':
-            function(SELECT);
+            controls.press(cboy::Button::SELECT);
+            break;
+    }
+}
+
+void normal_key_up_handler(unsigned char key, int /*x*/, int /*y*/) {
+    auto* gameboy = cboy::get_app_gameboy();
+    if (!gameboy) return;
+    auto& controls = gameboy->controls();
+    switch (key) {
+        case GLUT_KEY_RIGHT:
+            controls.release(cboy::Button::RIGHT);
+            break;
+        case GLUT_KEY_LEFT:
+            controls.release(cboy::Button::LEFT);
+            break;
+        case GLUT_KEY_UP:
+            controls.release(cboy::Button::UP);
+            break;
+        case GLUT_KEY_DOWN:
+            controls.release(cboy::Button::DOWN);
+            break;
+        case 'a':
+            controls.release(cboy::Button::A);
+            break;
+        case 's':
+            controls.release(cboy::Button::B);
+            break;
+        case 'q':
+            controls.release(cboy::Button::START);
+            break;
+        case 'w':
+            controls.release(cboy::Button::SELECT);
             break;
     }
 }
 
 void special_key_handler(int key, int x, int y) {
-    handle_key(key, press);
+    normal_key_handler(key, x, y);
 }
 
 void special_key_up_handler(int key, int x, int y) {
-    if (key == GLUT_KEY_F5)
-        load_state();
-    else if (key == GLUT_KEY_F6)
-        save_state();
-    else if (key == GLUT_KEY_F11)
-        toggle_fullscreen();
-    else
-        handle_key(key, release);
-}
-
-void normal_key_handler(unsigned char key, int x, int y) {
-    handle_key(key, press);
-}
-
-void normal_key_up_handler(unsigned char key, int x, int y) {
-    handle_key(key, release);
+    normal_key_up_handler(key, x, y);
 }
