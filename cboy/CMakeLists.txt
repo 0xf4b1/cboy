@@ -11,7 +11,7 @@ else()
 endif()
 
 # ---- Renderer selection --------------------------------------------------
-# Set via: cmake -DRENDERER=DIRECTX|DIRECT|OPENGL|VULKAN
+# Set via: cmake -DRENDERER=DIRECTX|GDI|OPENGL|VULKAN|SDL2|METAL
 # Defaults: DIRECTX on Windows, OPENGL elsewhere.
 
 if(NOT RENDERER)
@@ -40,8 +40,7 @@ elseif(RENDERER STREQUAL "GDI")
         message(FATAL_ERROR "RENDERER=GDI is only supported on Windows")
     endif()
     list(APPEND CBOY_SOURCES renderer_gdi.cpp)
-    # winmm for timeBeginPeriod/timeEndPeriod (accurate Sleep pacing)
-    set(RENDERER_LIBS winmm)
+    # winmm is linked globally for all Windows builds (FramePacer needs it)
 
 elseif(RENDERER STREQUAL "OPENGL")
     list(APPEND CBOY_SOURCES renderer_opengl.cpp)
@@ -229,6 +228,11 @@ if(WIN32 AND MSVC)
     set_target_properties(cboy PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
 elseif(WIN32 AND NOT MSVC)
     target_link_options(cboy PRIVATE -mwindows)
+endif()
+
+# winmm is needed on Windows for timeBeginPeriod/timeEndPeriod (used by FramePacer)
+if(WIN32)
+    target_link_libraries(cboy PRIVATE winmm)
 endif()
 
 # SDL2 on Windows: copy SDL2.dll next to the exe after build

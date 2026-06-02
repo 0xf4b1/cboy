@@ -3,7 +3,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <timeapi.h>   // timeBeginPeriod / timeEndPeriod
 
 #include <cstdint>
 #include <memory>
@@ -11,6 +10,7 @@
 #include "gameboy.hpp"
 #include "renderer_gdi.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 namespace cboy {
 namespace renderer {
@@ -74,9 +74,6 @@ static inline uint32_t rgb555_to_rgbx(uint16_t c) {
 }
 
 void GDIRenderer::run(Gameboy &gameboy) {
-    // Raise timer resolution so Sleep(1) is accurate enough for pacing
-    timeBeginPeriod(1);
-
     const wchar_t CLASS[] = L"cboy_gdi";
     WNDCLASSW wc = {};
     wc.lpfnWndProc   = wnd_proc;
@@ -89,7 +86,7 @@ void GDIRenderer::run(Gameboy &gameboy) {
     AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
 
     WindowState state{&gameboy, true};
-    HWND hwnd = CreateWindowExW(0, CLASS, L"cboy — GDI",
+    HWND hwnd = CreateWindowExW(0, CLASS, L"cboy - GDI",
                                 WS_OVERLAPPEDWINDOW,
                                 CW_USEDEFAULT, CW_USEDEFAULT,
                                 r.right - r.left, r.bottom - r.top,
@@ -111,12 +108,7 @@ void GDIRenderer::run(Gameboy &gameboy) {
 
     auto pixels = std::make_unique<uint32_t[]>(static_cast<size_t>(GB_W * GB_H));
 
-    // Target ~60 fps using QueryPerformanceCounter for accurate pacing.
-    LARGE_INTEGER freq, last_time;
-    QueryPerformanceFrequency(&freq);
-    QueryPerformanceCounter(&last_time);
-    const double frame_ns = 1.0e9 / 60.0; // nanoseconds per frame
-
+    FramePacer pacer;
     MSG msg = {};
     while (state.running) {
         // Drain message queue
@@ -172,26 +164,9 @@ void GDIRenderer::run(Gameboy &gameboy) {
                       0,     0,     GB_W,  GB_H,
                       pixels.get(), &bmi, DIB_RGB_COLORS, SRCCOPY);
 
-        // Pace to ~60 fps: spin-wait the remaining time in the frame budget
-        LARGE_INTEGER now;
-        QueryPerformanceCounter(&now);
-        double elapsed_ns = static_cast<double>(now.QuadPart - last_time.QuadPart)
-                            * 1.0e9 / static_cast<double>(freq.QuadPart);
-        double remaining_ns = frame_ns - elapsed_ns;
-        if (remaining_ns > 2.0e6) {
-            // Sleep for most of the wait (leave 2 ms for spin)
-            Sleep(static_cast<DWORD>((remaining_ns - 2.0e6) / 1.0e6));
-        }
-        // Spin for the last couple of milliseconds for precision
-        do {
-            QueryPerformanceCounter(&now);
-            elapsed_ns = static_cast<double>(now.QuadPart - last_time.QuadPart)
-                         * 1.0e9 / static_cast<double>(freq.QuadPart);
-        } while (elapsed_ns < frame_ns);
-        last_time = now;
+        pacer.wait();
     }
 
-    timeEndPeriod(1);
     ReleaseDC(hwnd, hdc);
     DestroyWindow(hwnd);
     UnregisterClassW(CLASS, nullptr);

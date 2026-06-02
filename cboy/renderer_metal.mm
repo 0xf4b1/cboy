@@ -14,6 +14,7 @@
 #include "gameboy.hpp"
 #include "renderer_metal.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 #import <Cocoa/Cocoa.h>
 #import <Metal/Metal.h>
@@ -95,15 +96,17 @@ fragment float4 frag(VertexOut in [[stage_in]],
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipeline;
 @property (nonatomic, strong) id<MTLTexture>   gbTexture;
 @property (nonatomic, strong) id<MTLBuffer>    stagingBuf;
+@property (nonatomic, assign) cboy::FramePacer *pacer;
 @end
 
 @implementation CBoyMTKDelegate
 
-- (instancetype)initWithDevice:(id<MTLDevice>)dev gameboy:(cboy::Gameboy *)gb {
+- (instancetype)initWithDevice:(id<MTLDevice>)dev gameboy:(cboy::Gameboy *)gb pacer:(cboy::FramePacer *)pacer {
     self = [super init];
     if (!self) return nil;
     self.device  = dev;
     self.gameboy = gb;
+    self.pacer   = pacer;
     self.queue   = [dev newCommandQueue];
 
     // Compile shaders
@@ -146,6 +149,10 @@ fragment float4 frag(VertexOut in [[stage_in]],
 }
 
 - (void)drawInMTKView:(MTKView *)view {
+    // Pace to GB rate before rendering — MTKView is set to a high frequency
+    // (e.g. 120 fps on ProMotion) and the pacer throttles it to ~59.7275 fps.
+    self.pacer->wait();
+
     cboy::Gameboy *gb = self.gameboy;
 
     // Run one GB frame and convert to BGRA8 in the staging buffer
@@ -261,13 +268,16 @@ namespace cboy {
 namespace renderer {
 
 void MetalRenderer::run(Gameboy &gameboy) {
-    // Create the NSApplication if we're not already running in one
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     if (!device)
         throw std::runtime_error("Metal not supported on this device");
+
+    // FramePacer lives on the heap so its address stays stable across the
+    // Objective-C delegate boundary.
+    cboy::FramePacer pacer;
 
     // Window
     NSRect frame = NSMakeRect(0, 0, GB_W * 4, GB_H * 4);
@@ -287,12 +297,13 @@ void MetalRenderer::run(Gameboy &gameboy) {
     view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     view.clearColor       = MTLClearColorMake(0, 0, 0, 1);
     // preferredFramesPerSecond defaults to 60; MTKView calls drawInMTKView: at that rate
-    view.preferredFramesPerSecond = 60;
-    view.enableSetNeedsDisplay    = NO; // timer-driven, not event-driven
+    view.preferredFramesPerSecond = 120; // call often; pacer throttles to GB rate
+    view.enableSetNeedsDisplay    = NO;  // timer-driven, not event-driven
     view.paused                   = NO;
 
     CBoyMTKDelegate *delegate = [[CBoyMTKDelegate alloc] initWithDevice:device
-                                                                 gameboy:&gameboy];
+                                                                 gameboy:&gameboy
+                                                                   pacer:&pacer];
     view.delegate = delegate;
 
     CBoyWindowDelegate *win_delegate = [CBoyWindowDelegate new];

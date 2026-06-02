@@ -11,6 +11,7 @@
 #include "gameboy.hpp"
 #include "renderer_vulkan.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -119,7 +120,8 @@ static SwapchainState create_swapchain(VkDevice device, VkPhysicalDevice gpu,
                                         uint32_t graphics_family,
                                         VkCommandPool cmd_pool,
                                         VkSwapchainKHR old_swapchain,
-                                        GLFWwindow *window) {
+                                        GLFWwindow *window,
+                                        VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR) {
     VkSurfaceCapabilitiesKHR caps;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &caps);
 
@@ -129,10 +131,10 @@ static SwapchainState create_swapchain(VkDevice device, VkPhysicalDevice gpu,
     if (ext.width == 0xFFFFFFFF) {
         int fw, fh;
         glfwGetFramebufferSize(window, &fw, &fh);
-        ext.width  = std::max(caps.minImageExtent.width,
-                              std::min(caps.maxImageExtent.width,  (uint32_t)fw));
-        ext.height = std::max(caps.minImageExtent.height,
-                              std::min(caps.maxImageExtent.height, (uint32_t)fh));
+        ext.width  = (std::max)(caps.minImageExtent.width,
+                               (std::min)(caps.maxImageExtent.width,  (uint32_t)fw));
+        ext.height = (std::max)(caps.minImageExtent.height,
+                               (std::min)(caps.maxImageExtent.height, (uint32_t)fh));
     }
 
     VkSwapchainCreateInfoKHR sci = {};
@@ -148,7 +150,7 @@ static SwapchainState create_swapchain(VkDevice device, VkPhysicalDevice gpu,
     sci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     sci.preTransform     = caps.currentTransform;
     sci.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    sci.presentMode      = VK_PRESENT_MODE_FIFO_KHR;
+    sci.presentMode      = present_mode;
     sci.clipped          = VK_TRUE;
     sci.oldSwapchain     = old_swapchain;
 
@@ -267,8 +269,19 @@ void VulkanRenderer::run(Gameboy &gameboy) {
     vkCreateCommandPool(device, &cpci, nullptr, &cmd_pool);
 
     // --- Initial swapchain ---
+    // Pick IMMEDIATE present mode (no vsync) so FramePacer controls the rate.
+    // Fall back to FIFO if IMMEDIATE isn't supported.
+    uint32_t pm_count = 0;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &pm_count, nullptr);
+    std::vector<VkPresentModeKHR> present_modes(pm_count);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &pm_count, present_modes.data());
+    VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
+    for (auto m : present_modes)
+        if (m == VK_PRESENT_MODE_IMMEDIATE_KHR) { present_mode = m; break; }
+
     SwapchainState sc = create_swapchain(device, gpu, surface, graphics_family,
-                                          cmd_pool, VK_NULL_HANDLE, window);
+                                          cmd_pool, VK_NULL_HANDLE, window,
+                                          present_mode);
 
     // --- Staging buffer (160×144×4 bytes, persistently mapped) ---
     const uint32_t pixel_bytes = GB_W * GB_H * 4;
@@ -347,6 +360,7 @@ void VulkanRenderer::run(Gameboy &gameboy) {
 
     uint32_t current_frame = 0;
     bool need_rebuild = false;
+    FramePacer pacer;
 
     // --- Main loop ---
     while (!glfwWindowShouldClose(window)) {
@@ -364,7 +378,7 @@ void VulkanRenderer::run(Gameboy &gameboy) {
                                  static_cast<uint32_t>(sc.cmd_bufs.size()),
                                  sc.cmd_bufs.data());
             sc = create_swapchain(device, gpu, surface, graphics_family,
-                                  cmd_pool, old, window);
+                                  cmd_pool, old, window, present_mode);
             vkDestroySwapchainKHR(device, old, nullptr);
             need_rebuild = false;
         }
@@ -490,6 +504,7 @@ void VulkanRenderer::run(Gameboy &gameboy) {
             need_rebuild = true;
 
         current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
+        pacer.wait();
     }
 
     // --- Cleanup ---

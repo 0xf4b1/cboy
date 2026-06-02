@@ -4,6 +4,7 @@
 #include "gameboy.hpp"
 #include "renderer_opengl.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -86,7 +87,7 @@ void OpenGLRenderer::run(Gameboy &gameboy) {
     glfwSetWindowUserPointer(window, &gameboy);
     glfwSetKeyCallback(window, key_callback);
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // vsync
+    glfwSwapInterval(0); // disable vsync — FramePacer controls rate
 
     // --- Texture setup ---
     GLuint tex = 0;
@@ -105,6 +106,7 @@ void OpenGLRenderer::run(Gameboy &gameboy) {
     glLoadIdentity();
 
     std::vector<uint8_t> pixels;
+    FramePacer pacer;
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -132,6 +134,7 @@ void OpenGLRenderer::run(Gameboy &gameboy) {
         glDisable(GL_TEXTURE_2D);
 
         glfwSwapBuffers(window);
+        pacer.wait();
     }
 
     glDeleteTextures(1, &tex);

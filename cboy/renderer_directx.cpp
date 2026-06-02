@@ -4,6 +4,7 @@
 #include "gameboy.hpp"
 #include "renderer_directx.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -262,6 +263,7 @@ void DirectXRenderer::run(Gameboy &gameboy) {
     UpdateWindow(s.hwnd);
 
     // --- Main loop ---
+    FramePacer pacer;
     MSG msg = {};
     while (s.running) {
         while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -273,6 +275,7 @@ void DirectXRenderer::run(Gameboy &gameboy) {
 
         // Run one GB frame
         const display::Frame &frame = gameboy.run_frame();
+        pacer.wait();
 
         // Upload pixels to the texture: GB RGB555 → RGBA8
         D3D11_MAPPED_SUBRESOURCE mapped;
@@ -336,7 +339,7 @@ void DirectXRenderer::run(Gameboy &gameboy) {
         s.ctx->PSSetSamplers(0, 1, s.sampler.GetAddressOf());
         s.ctx->Draw(4, 0);
 
-        s.swap_chain->Present(1, 0); // vsync
+        s.swap_chain->Present(0, 0); // no vsync — FramePacer controls rate
     }
 
     DestroyWindow(s.hwnd);

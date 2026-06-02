@@ -12,6 +12,7 @@
 #include "gameboy.hpp"
 #include "renderer_sdl2.hpp"
 #include "controls.hpp"
+#include "frame_pacer.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -78,10 +79,10 @@ void SDL2Renderer::run(Gameboy &gameboy) {
     if (!window)
         throw std::runtime_error(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
 
-    // Hardware-accelerated renderer with vsync
+    // Hardware-accelerated renderer — no vsync, FramePacer controls rate
     SDL_Renderer *renderer = SDL_CreateRenderer(
         window, -1,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_RENDERER_ACCELERATED);
     if (!renderer) {
         // Fall back to software renderer if hardware isn't available
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
@@ -104,6 +105,7 @@ void SDL2Renderer::run(Gameboy &gameboy) {
         throw std::runtime_error(std::string("SDL_CreateTexture failed: ") + SDL_GetError());
 
     bool running = true;
+    FramePacer pacer;
     while (running) {
         // --- Events ---
         SDL_Event ev;
@@ -154,7 +156,8 @@ void SDL2Renderer::run(Gameboy &gameboy) {
         SDL_Rect dst_rect = letterbox(win_w, win_h);
         SDL_RenderCopy(renderer, tex, nullptr, &dst_rect);
 
-        SDL_RenderPresent(renderer);  // vsync blocks here if enabled
+        SDL_RenderPresent(renderer);
+        pacer.wait();
     }
 
     SDL_DestroyTexture(tex);
