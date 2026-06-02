@@ -35,12 +35,13 @@ if(RENDERER STREQUAL "DIRECTX")
     list(APPEND CBOY_SOURCES renderer_directx.cpp)
     set(RENDERER_LIBS d3d11 dxgi d3dcompiler)
 
-elseif(RENDERER STREQUAL "DIRECT")
+elseif(RENDERER STREQUAL "GDI")
     if(NOT WIN32)
-        message(FATAL_ERROR "RENDERER=DIRECT is only supported on Windows")
+        message(FATAL_ERROR "RENDERER=GDI is only supported on Windows")
     endif()
-    list(APPEND CBOY_SOURCES renderer_direct.cpp)
-    # GDI is linked via the Windows SDK automatically on MSVC
+    list(APPEND CBOY_SOURCES renderer_gdi.cpp)
+    # winmm for timeBeginPeriod/timeEndPeriod (accurate Sleep pacing)
+    set(RENDERER_LIBS winmm)
 
 elseif(RENDERER STREQUAL "OPENGL")
     list(APPEND CBOY_SOURCES renderer_opengl.cpp)
@@ -131,8 +132,70 @@ elseif(RENDERER STREQUAL "VULKAN")
 
     set(RENDERER_LIBS Vulkan::Vulkan glfw)
 
+elseif(RENDERER STREQUAL "SDL2")
+    list(APPEND CBOY_SOURCES renderer_sdl2.cpp)
+
+    if(WIN32)
+        # SDL2 on Windows: expect SDL2_DIR or SDL2_SDK_DIR pointing to the
+        # extracted SDL2 development package (e.g. SDL2-devel-2.x.x-VC.zip).
+        # Override with -DSDL2_SDK_DIR=<path>.
+        if(NOT DEFINED SDL2_SDK_DIR)
+            if(DEFINED ENV{SDL2_DIR})
+                set(SDL2_SDK_DIR "$ENV{SDL2_DIR}")
+            else()
+                # Common manual install location — adjust as needed
+                set(SDL2_SDK_DIR "C:/SDL2")
+            endif()
+        endif()
+
+        message(STATUS "SDL2 SDK: ${SDL2_SDK_DIR}")
+
+        if(NOT EXISTS "${SDL2_SDK_DIR}/include/SDL2/SDL.h")
+            message(FATAL_ERROR
+                "SDL.h not found under ${SDL2_SDK_DIR}/include/SDL2\n"
+                "Download SDL2-devel-*-VC.zip from https://libsdl.org/download-2.0.php\n"
+                "and set -DSDL2_SDK_DIR=<extracted path>")
+        endif()
+
+        add_library(SDL2::SDL2 SHARED IMPORTED)
+        set_target_properties(SDL2::SDL2 PROPERTIES
+            IMPORTED_LOCATION             "${SDL2_SDK_DIR}/lib/x64/SDL2.dll"
+            IMPORTED_IMPLIB               "${SDL2_SDK_DIR}/lib/x64/SDL2.lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${SDL2_SDK_DIR}/include"
+        )
+        add_library(SDL2::SDL2main STATIC IMPORTED)
+        set_target_properties(SDL2::SDL2main PROPERTIES
+            IMPORTED_LOCATION "${SDL2_SDK_DIR}/lib/x64/SDL2main.lib"
+        )
+        set(RENDERER_LIBS SDL2::SDL2 SDL2::SDL2main)
+
+    else()
+        find_package(SDL2 REQUIRED)
+        # SDL2 cmake config names differ across distros/versions
+        if(TARGET SDL2::SDL2)
+            set(RENDERER_LIBS SDL2::SDL2)
+        else()
+            set(RENDERER_LIBS ${SDL2_LIBRARIES})
+        endif()
+    endif()
+
+elseif(RENDERER STREQUAL "METAL")
+    if(NOT APPLE)
+        message(FATAL_ERROR "RENDERER=METAL is only supported on Apple platforms")
+    endif()
+    list(APPEND CBOY_SOURCES renderer_metal.mm)
+    # Metal, MetalKit, Cocoa — all system frameworks on macOS
+    set(RENDERER_LIBS
+        "-framework Metal"
+        "-framework MetalKit"
+        "-framework Cocoa"
+        "-framework QuartzCore"
+    )
+
 else()
-    message(FATAL_ERROR "Unknown RENDERER '${RENDERER}'. Choose: DIRECTX DIRECT OPENGL VULKAN")
+    message(FATAL_ERROR
+        "Unknown RENDERER '${RENDERER}'. "
+        "Choose: DIRECTX GDI OPENGL VULKAN SDL2 METAL")
 endif()
 
 # Joystick support on Linux
@@ -151,6 +214,11 @@ target_include_directories(cboy PRIVATE
     ${CBOY_BACKEND_INCLUDE}
 )
 
+# SDL2 on non-Windows may need include dirs from find_package variables
+if(RENDERER STREQUAL "SDL2" AND NOT WIN32 AND DEFINED SDL2_INCLUDE_DIRS)
+    target_include_directories(cboy PRIVATE ${SDL2_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(cboy PRIVATE
     ${CBOY_BACKEND_LIB}
     ${RENDERER_LIBS}
@@ -161,6 +229,15 @@ if(WIN32 AND MSVC)
     set_target_properties(cboy PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
 elseif(WIN32 AND NOT MSVC)
     target_link_options(cboy PRIVATE -mwindows)
+endif()
+
+# SDL2 on Windows: copy SDL2.dll next to the exe after build
+if(RENDERER STREQUAL "SDL2" AND WIN32 AND DEFINED SDL2_SDK_DIR)
+    add_custom_command(TARGET cboy POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL2_SDK_DIR}/lib/x64/SDL2.dll"
+            "$<TARGET_FILE_DIR:cboy>/SDL2.dll"
+    )
 endif()
 
 # Compile-time renderer define (useful for #ifdef guards if ever needed)
