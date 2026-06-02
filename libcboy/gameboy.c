@@ -91,11 +91,13 @@ void load_rom(char *path) {
 }
 
 void load_state() {
-    char filename[strlen(gameboy.mmu.mbc.filename) + 5];
-    stpcpy(filename, gameboy.mmu.mbc.filename);
+    size_t len = strlen(gameboy.mmu.mbc.filename);
+    char *filename = (char *)malloc(len + 5);
+    strcpy(filename, gameboy.mmu.mbc.filename);
     strcat(filename, ".sav");
 
     FILE *file = fopen(filename, "rb");
+    free(filename);
 
     if (!file) {
         printf("No state for current rom exists!\n");
@@ -118,11 +120,13 @@ void load_state() {
 }
 
 void save_state() {
-    char filename[strlen(gameboy.mmu.mbc.filename) + 5];
-    stpcpy(filename, gameboy.mmu.mbc.filename);
+    size_t len = strlen(gameboy.mmu.mbc.filename);
+    char *filename = (char *)malloc(len + 5);
+    strcpy(filename, gameboy.mmu.mbc.filename);
     strcat(filename, ".sav");
 
     FILE *file = fopen(filename, "wb");
+    free(filename);
 
     // save ram state
     fwrite(&gameboy.mmu, sizeof(Mmu), 1, file);

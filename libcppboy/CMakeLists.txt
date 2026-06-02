@@ -36,15 +36,19 @@ target_include_directories(libcboy PUBLIC
 )
 
 # Enable all compiler warnings for the library
-target_compile_options(libcboy PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wconversion
-    -Wsign-conversion
-    -Wdouble-promotion
-    -Wformat=2
-)
+if(MSVC)
+    target_compile_options(libcboy PRIVATE /W4)
+else()
+    target_compile_options(libcboy PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wdouble-promotion
+        -Wformat=2
+    )
+endif()
 
 # Optional: Enable clang-specific warnings if using clang
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -72,10 +76,10 @@ set_target_properties(libcboy PROPERTIES
     SOVERSION 1
 )
 
-# Link against standard C++ library (explicit for clarity)
-target_link_libraries(libcboy PUBLIC
-    stdc++
-)
+# Link against standard C++ library (explicit for clarity, GCC only)
+if(NOT MSVC)
+    target_link_libraries(libcboy PUBLIC stdc++)
+endif()
 
 # Optional: Add sanitizers for debug builds
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

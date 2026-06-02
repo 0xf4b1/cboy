@@ -7,7 +7,7 @@
 namespace cboy {
 namespace renderer {
 
-class OpenGLRenderer final : public IRenderer {
+class VulkanRenderer final : public IRenderer {
 public:
     void run(Gameboy &gameboy) override;
 };

@@ -9,10 +9,10 @@
 static unsigned short background[256][256];
 static unsigned short window[256][256];
 
-static unsigned char scy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-static unsigned char scx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-static unsigned char wy[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
-static unsigned char wx[HEIGHT + 1] = {[0 ... HEIGHT] = 0};
+static unsigned char scy[HEIGHT + 1];
+static unsigned char scx[HEIGHT + 1];
+static unsigned char wy[HEIGHT + 1];
+static unsigned char wx[HEIGHT + 1];
 
 void set_params(unsigned char i) {
     scy[i] = read_mmu(0xFF42);
