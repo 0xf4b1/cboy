@@ -5,9 +5,13 @@ if(BACKEND STREQUAL "LIBCBOY")
     # Renderers include "gameboy.hpp" — the adapter provides that header.
     set(CBOY_BACKEND_INCLUDE ${CMAKE_SOURCE_DIR}/libcboy_adapter)
     set(CBOY_BACKEND_LIB     libcboy_adapter)
+    # libcboy expects serial_print() as an external C symbol — provide a
+    # default implementation that just prints to stdout.
+    set(CBOY_EXTRA_SOURCES ${CMAKE_SOURCE_DIR}/libcboy_adapter/serial_print.cpp)
 else()
     set(CBOY_BACKEND_INCLUDE ${CMAKE_SOURCE_DIR}/libcppboy)
     set(CBOY_BACKEND_LIB     libcboy)   # libcppboy's CMake target is "libcboy"
+    set(CBOY_EXTRA_SOURCES "")
 endif()
 
 # ---- Renderer selection --------------------------------------------------
@@ -206,7 +210,7 @@ endif()
 
 # ---- Target --------------------------------------------------------------
 
-add_executable(cboy ${CBOY_SOURCES})
+add_executable(cboy ${CBOY_SOURCES} ${CBOY_EXTRA_SOURCES})
 
 target_include_directories(cboy PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

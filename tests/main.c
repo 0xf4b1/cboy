@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
     load_rom(argv[1]);
 
-    // run for some frames and fail when there is no result
+    // run for up to 2000 frames and fail when there is no result
     for (int i = 0; i < 2000; i++) {
         next_frame();
     }

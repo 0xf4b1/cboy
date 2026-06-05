@@ -73,7 +73,7 @@ void write_mmu(unsigned short addr, unsigned char value) {
 
     if (addr == 0xFF02) {
         // serial
-        //serial_print(gameboy.mmu.ram[0xFF01 - 0x8000]);
+        serial_print(gameboy.mmu.ram[0xFF01 - 0x8000]);
         return;
     }
 

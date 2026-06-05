@@ -20,6 +20,7 @@ public:
     Gameboy(MMU& external_mmu, CPU& external_cpu, Controls& external_controls);
     Gameboy(const Gameboy&) = delete;
     Gameboy& operator=(const Gameboy&) = delete;
+    virtual ~Gameboy() = default;
     
     void load_rom(const std::string& path);
     void load_state();
@@ -47,7 +48,7 @@ public:
     uint32_t get_bg_palette(uint8_t index) const;
     uint32_t get_sprite_palette(uint8_t index) const;
     
-    void serial_print(char c);
+    virtual void serial_print(char c);
 
 private:
     std::unique_ptr<Controls> m_owned_controls;
