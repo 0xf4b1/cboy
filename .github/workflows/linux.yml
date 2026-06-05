@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v6
     - name: install dependencies
-      run: sudo apt-get install freeglut3-dev
+      run: sudo apt-get install libglfw3-dev
     - name: build
       run: |
         mkdir build && cd build
@@ -21,7 +21,7 @@ jobs:
         cd build
         make test
     - name: upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v7
       with:
         name: cboy
         path: build/cboy/cboy
