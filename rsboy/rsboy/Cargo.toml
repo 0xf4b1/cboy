@@ -1,0 +1,17 @@
+[package]
+name = "rsboy"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "rsboy"
+path = "src/main.rs"
+
+[[bin]]
+name = "rsboy-test"
+path = "src/test_runner.rs"
+
+[dependencies]
+librsboy = { path = "../librsboy" }
+winit = "0.28"
+pixels = "0.13"

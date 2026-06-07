@@ -1,0 +1,8 @@
+[package]
+name = "librsboy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "librsboy"
+path = "src/lib.rs"
